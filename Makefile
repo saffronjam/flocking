@@ -8,7 +8,7 @@ ifeq ($(detected_OS), Windows)
 OUTPUT := main.exe
 LIBLOC := -Llib
 FLAGS := -Iinclude -Wall -g -pthread
-else
+else ifeq($(detected_OS), Linux)
 OUTPUT := main.out
 LIBLOC := -L/usr/lib/x86_64-linux-gnu
 FLAGS := -Wall -g -pthread
@@ -17,9 +17,9 @@ endif
 CC := g++
 OUTFLAG := -o
 ENTRY = MainWin.cpp
-SRC := ./include
+SRC := include
 SRCS := $(wildcard $(SRC)/*.cpp)
-LIBS := -lsfml-audio -lsfml-graphics -lsfml-main -lsfml-network -lsfml-system -lsfml-window
+LIBS := -lsfml-audio -lsfml-graphics -lsfml-network -lsfml-system -lsfml-window
 
 
 myOS:
