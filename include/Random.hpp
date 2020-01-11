@@ -1,31 +1,19 @@
 #pragma once
-#include <random>
+#include <stdlib.h>
+#include <time.h>
 
 class Random
 {
 
 public:
-	Random()
-		: lowerBound(0),
-		  upperBound(10),
-		  rng(rd()),
-		  randomNum(lowerBound, upperBound){};
+	Random(int const &lower = 0, int const &upper = 10)
+		: m_lower(lower),
+		  m_upper(upper){};
 
-	int operator()()
-	{
-		return randomNum(rng);
-	}
+	int Gen() { return (double)((rand() % ((int)m_upper - (int)m_lower)) + (int)m_lower); }
 
-	void SetLowerBound(int lowerBound_IN)
-	{
-		lowerBound = lowerBound_IN;
-		randomNum = std::uniform_int_distribution<int>(lowerBound, upperBound);
-	};
-	void SetUpperBound(int upperBound_IN)
-	{
-		upperBound = upperBound_IN;
-		randomNum = std::uniform_int_distribution<int>(lowerBound, upperBound);
-	};
+	void SetLowerBound(int lowerBound_IN) { m_lower = lowerBound_IN; };
+	void SetUpperBound(int upperBound_IN) { m_upper = upperBound_IN; };
 
 	static double Generate(double lower, double upper)
 	{
@@ -33,17 +21,10 @@ public:
 		{
 			std::swap(lower, upper);
 		}
-		std::random_device rd;
-		std::mt19937 rng(rd());
-		std::uniform_int_distribution<int> randomNum(lower, upper);
-		return randomNum(rng);
+		return (double)((rand() % ((int)upper - (int)lower)) + (int)lower);
 	}
 
 private:
-	int lowerBound;
-	int upperBound;
-
-	std::random_device rd;
-	std::mt19937 rng;
-	std::uniform_int_distribution<int> randomNum;
+	int m_lower;
+	int m_upper;
 };

@@ -24,14 +24,16 @@ Boid::Boid(sf::Vector2f position, sf::Vector2f startVelocity, float collideZoneR
     m_collideZoneRadiusShape.setOutlineColor(sf::Color::White);
 }
 
+#include "Random.hpp"
 void Boid::Update(sf::Time const &dt)
 {
     CorrectBodyAccordingToDirection();
     m_acceleration = gf::Constrain(m_acceleration, -5.0f, 5.0f);
     m_velocity += m_acceleration * dt.asSeconds();
     m_velocity = gf::Constrain(m_velocity, -50.0f, 50.0f);
-    m_velocity = gf::ConstrainLower(m_velocity, 1.0f);
-    m_velocity = gf::ConstrainUpper(m_velocity, 1.0f);
+    m_velocity = gf::Constrain(m_velocity, -50.0f, 50.0f);
+    // m_velocity = gf::ConstrainLower(m_velocity, 1.0f);
+    // m_velocity = gf::ConstrainUpper(m_velocity, 1.0f);
     m_position += m_velocity * dt.asSeconds();
     m_collideZoneRadiusShape.setPosition(m_position - sf::Vector2f(m_collideZoneRadius, m_collideZoneRadius));
 }

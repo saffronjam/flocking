@@ -2,6 +2,7 @@
 
 #include "Random.hpp"
 #include "Camera.hpp"
+#include <iostream>
 
 FlockingController::FlockingController(int const &nBoids)
 {

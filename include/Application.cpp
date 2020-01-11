@@ -1,4 +1,6 @@
 #include "Application.hpp"
+#include <stdlib.h>
+#include <time.h>
 
 Application::Application(sf::Time &dt)
 	: m_gfx(m_camera),
@@ -10,6 +12,7 @@ Application::Application(sf::Time &dt)
 	  m_camera_follow(0.0f, 0.0f),
 	  m_flockingController(100)
 {
+	srand(time(NULL));
 }
 
 void Application::Go()
@@ -38,7 +41,6 @@ void Application::HandleEvents()
 		}
 	}
 }
-
 void Application::UpdateLogic()
 {
 	m_iu.Update();

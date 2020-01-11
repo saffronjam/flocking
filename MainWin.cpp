@@ -1,4 +1,4 @@
-#include "SFML/System/Clock.hpp"
+#include <SFML/System/Clock.hpp>
 #include "include/Application.hpp"
 
 int main()
