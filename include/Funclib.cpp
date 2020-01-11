@@ -30,7 +30,7 @@ std::vector<sf::Vector2f> Funclib::WrapPoints(std::vector<sf::Vector2f> *points)
     //Inital removal of center-points
     for (auto &point : *points)
     {
-        if (!vf::isLeft(startLine.first, startLine.second, point))
+        if (vf::isLeft(startLine.first, startLine.second, point))
         {
             topPoints.emplace_back(&point);
         }
@@ -72,11 +72,11 @@ void Funclib::ClearPointsRecursively(std::pair<sf::Vector2f, sf::Vector2f> line,
         std::vector<sf::Vector2f *> consideredPoints2;
         for (auto &point : *points)
         {
-            if (!vf::isLeft(newLine.first, newLine.second, *point))
+            if (vf::isLeft(newLine.first, newLine.second, *point))
             {
                 consideredPoints1.emplace_back(point);
             }
-            else if (!vf::isLeft(line.first, line.second, *point))
+            else if (vf::isLeft(line.first, line.second, *point))
             {
                 consideredPoints2.emplace_back(point);
             }
@@ -273,7 +273,7 @@ float vf::Slope(sf::Vector2f point1, sf::Vector2f point2)
 
 bool vf::isLeft(sf::Vector2f line_point1, sf::Vector2f line_point2, sf::Vector2f point)
 {
-    return ((line_point2.x - line_point1.x) * (point.y - line_point1.y) - (line_point2.y - line_point1.y) * (point.x - line_point1.x)) > 0.0f;
+    return ((line_point2.x - line_point1.x) * (point.y - line_point1.y) - (line_point2.y - line_point1.y) * (point.x - line_point1.x)) < 0.0f;
 }
 
 float vf::DistanceFromLine(sf::Vector2f line_point1, sf::Vector2f line_point2, sf::Vector2f point)
@@ -484,7 +484,7 @@ bool sfmlext::PolygonContains(sf::ConvexShape const &polygon, sf::Vector2f const
     bool allPointsInPolygon = true;
     for (size_t i = 0; i < allVertices.size() - 1; i += 2)
     {
-        if (!vf::isLeft(allVertices[i], allVertices[i + 1], point))
+        if (vf::isLeft(allVertices[i], allVertices[i + 1], point))
         {
             allPointsInPolygon = false;
             break;

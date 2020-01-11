@@ -7,35 +7,32 @@ Boid::Boid(sf::Vector2f position, sf::Vector2f startVelocity, float collideZoneR
     : m_position(position),
       m_velocity(startVelocity),
       m_acceleration(0.0f, 0.0f),
+      m_directionVector(vf::Unit(m_velocity)),
+      m_visionShapeMaxPoints(70),
+      m_visionShape(sf::TrianglesFan, m_visionShapeMaxPoints),
       m_collideZoneRadius(collideZoneRadius),
       m_seeingDistance(100.0f),
       m_seeingAngle(Math::Constants::PI / 2.0f),
-      m_separationStrength(1.0f),
-      m_alignmentStrength(1.0f),
-      m_cohesionStrength(1.0f)
+      m_separationStrength(2.0f),
+      m_alignmentStrength(2.0f),
+      m_cohesionStrength(2.0f),
+      m_speed(50.0f)
 {
     m_body.setPointCount(3);
-    m_body.setFillColor(sf::Color::Red);
-    m_body.setOutlineColor(sf::Color::White);
-
-    m_collideZoneRadiusShape.setRadius(m_collideZoneRadius);
-    m_collideZoneRadiusShape.setFillColor(sf::Color::Transparent);
-    m_collideZoneRadiusShape.setOutlineThickness(1.0f);
-    m_collideZoneRadiusShape.setOutlineColor(sf::Color::White);
+    m_body.setFillColor(sf::Color(230, 0, 0, 110));
+    m_body.setOutlineColor(sf::Color(100, 100, 100, 200));
+    m_body.setOutlineThickness(1.0f);
 }
 
-#include "Random.hpp"
 void Boid::Update(sf::Time const &dt)
 {
     CorrectBodyAccordingToDirection();
-    m_acceleration = gf::Constrain(m_acceleration, -5.0f, 5.0f);
+    CorrectVisionAccordingToDirection();
+
     m_velocity += m_acceleration * dt.asSeconds();
-    m_velocity = gf::Constrain(m_velocity, -50.0f, 50.0f);
-    m_velocity = gf::Constrain(m_velocity, -50.0f, 50.0f);
-    // m_velocity = gf::ConstrainLower(m_velocity, 1.0f);
-    // m_velocity = gf::ConstrainUpper(m_velocity, 1.0f);
+    UpdateDirectionVector();
+    m_velocity = m_directionVector * m_speed;
     m_position += m_velocity * dt.asSeconds();
-    m_collideZoneRadiusShape.setPosition(m_position - sf::Vector2f(m_collideZoneRadius, m_collideZoneRadius));
 }
 
 void Boid::Draw(Graphics &gfx)
@@ -51,18 +48,9 @@ void Boid::DrawLineToNeighbors(Graphics &gfx)
     }
 }
 
-void Boid::DrawCollideZoneCircle(Graphics &gfx)
-{
-    gfx.Draw(m_collideZoneRadiusShape);
-}
-
 void Boid::DrawVisionShape(Graphics &gfx)
 {
-    const sf::Vector2f forwardLeft(vf::Rotate(m_position + vf::Unit(m_velocity) * m_seeingDistance, -m_seeingAngle / 2.0f, m_position));
-    const sf::Vector2f forwardRight(vf::Rotate(m_position + vf::Unit(m_velocity) * m_seeingDistance, m_seeingAngle / 2.0f, m_position));
-
-    gfx.DrawLine(m_position, forwardLeft);
-    gfx.DrawLine(m_position, forwardRight);
+    gfx.Draw(m_visionShape);
 }
 
 sf::Vector2f Boid::Separation()
@@ -130,13 +118,39 @@ void Boid::Clamp(sf::FloatRect const &box)
     }
 }
 
+std::pair<sf::Vector2f, sf::Vector2f> Boid::GetVisionLimitBorders() const
+{
+    return std::pair<sf::Vector2f, sf::Vector2f>(m_visionShape[1].position, m_visionShape[m_visionShapeMaxPoints - 1].position);
+}
+
+void Boid::UpdateDirectionVector()
+{
+    if (vf::Length(m_velocity) > 0.0f)
+    {
+        m_directionVector = vf::Unit(m_velocity);
+    }
+}
+
 void Boid::CorrectBodyAccordingToDirection()
 {
-    const sf::Vector2f frontPoint(m_position + vf::Unit(m_velocity) * m_collideZoneRadius);
-    const sf::Vector2f backLeftPoint(vf::Rotate(m_position - vf::Unit(m_velocity) * m_collideZoneRadius, -Math::Constants::PI / 4.0f, m_position));
-    const sf::Vector2f backRightPoint(vf::Rotate(m_position - vf::Unit(m_velocity) * m_collideZoneRadius, Math::Constants::PI / 4.0f, m_position));
+    const sf::Vector2f frontPoint(m_position + m_directionVector * m_collideZoneRadius);
+    const sf::Vector2f backLeftPoint(vf::Rotate(m_position - m_directionVector * m_collideZoneRadius, -Math::Constants::PI / 4.0f, m_position));
+    const sf::Vector2f backRightPoint(vf::Rotate(m_position - m_directionVector * m_collideZoneRadius, Math::Constants::PI / 4.0f, m_position));
 
     m_body.setPoint(0, frontPoint);
     m_body.setPoint(1, backLeftPoint);
     m_body.setPoint(2, backRightPoint);
+}
+
+void Boid::CorrectVisionAccordingToDirection()
+{
+    m_visionShape[0] = m_position;
+    m_visionShape[0].color = sf::Color(sf::Color(200, 200, 200, 150));
+    float angle = 0.0f;
+    int i = 1;
+    for (; i < m_visionShapeMaxPoints && angle < m_seeingAngle; i++, angle += m_seeingAngle / m_visionShapeMaxPoints)
+    {
+        m_visionShape[i] = vf::Rotate(m_position + m_directionVector * m_seeingDistance, angle - m_seeingAngle / 2.0f, m_position);
+        m_visionShape[i].color = sf::Color(sf::Color(70, 40, 40, 30));
+    }
 }

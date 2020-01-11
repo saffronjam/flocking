@@ -13,18 +13,28 @@ public:
     void Update(sf::Time const &dt);
     void Draw(Graphics &gfx);
     void DrawLineToNeighbors(Graphics &gfx);
-    void DrawCollideZoneCircle(Graphics &gfx);
     void DrawVisionShape(Graphics &gfx);
 
     void Clamp(sf::FloatRect const &box);
 
-    sf::Vector2f const &GetPosition() { return m_position; }
-    sf::Vector2f const &GetVelocity() { return m_velocity; }
-    float GetSeeingDistance() { return m_seeingDistance; }
-    float GetSeparationStrength() { return m_separationStrength; }
-    float GetAlignmentStrength() { return m_alignmentStrength; }
-    float GetCohesionStrength() { return m_cohesionStrength; }
+    sf::Vector2f GetPosition() const { return m_position; }
+    sf::Vector2f GetVelocity() { return m_velocity; }
+    sf::Vector2f GetDirectionVector() const { return m_directionVector; }
+    float GetSeeingDistance() const { return m_seeingDistance; }
+    float GetSeeingAngle() const { return m_seeingAngle; }
+    float GetSeparationStrength() const { return m_separationStrength; }
+    float GetAlignmentStrength() const { return m_alignmentStrength; }
+    float GetCohesionStrength() const { return m_cohesionStrength; }
+    float GetSpeed() const { return m_speed; }
+    std::pair<sf::Vector2f, sf::Vector2f> GetVisionLimitBorders() const;
+
     void SetAcceleration(sf::Vector2f const &acceleration) { m_acceleration = acceleration; }
+    void SetSeeingDistance(float const &seeingDistance) { m_seeingDistance = seeingDistance; }
+    void SetSeeingAngle(float const &seeingAngle) { m_seeingAngle = seeingAngle; }
+    void SetSeparationStrength(float const &separationStrength) { m_separationStrength = separationStrength; }
+    void SetAlignmentStrength(float const &alignmentStrength) { m_alignmentStrength = alignmentStrength; }
+    void SetCohesionStrength(float const &cohesionStrength) { m_cohesionStrength = cohesionStrength; }
+    void SetSpeed(float const &speed) { m_speed = speed; }
 
     void AddNeighbor(std::shared_ptr<Boid> boid) { m_neighbors.emplace(boid); }
     void RemoveNeighbor(std::shared_ptr<Boid> boid) { m_neighbors.erase(boid); }
@@ -35,7 +45,9 @@ public:
     sf::Vector2f Cohesion();
 
 private:
+    void UpdateDirectionVector();
     void CorrectBodyAccordingToDirection();
+    void CorrectVisionAccordingToDirection();
 
 private:
     sf::Vector2f m_position;
@@ -43,16 +55,20 @@ private:
     sf::Vector2f m_velocity;
     sf::Vector2f m_acceleration;
 
+    sf::Vector2f m_directionVector;
+
     sf::ConvexShape m_body;
-    sf::CircleShape m_collideZoneRadiusShape;
+    const int m_visionShapeMaxPoints;
+    sf::VertexArray m_visionShape;
+
     float m_collideZoneRadius;
 
     float m_seeingDistance;
     float m_seeingAngle;
-
     float m_separationStrength;
     float m_alignmentStrength;
     float m_cohesionStrength;
+    float m_speed;
 
     std::set<std::shared_ptr<Boid>> m_neighbors;
 };
