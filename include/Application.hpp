@@ -43,4 +43,5 @@ private:
 	sf::Text m_textSeeingAngle;
 	sf::Text m_textSpeed;
 	sf::Text m_textDraw;
+	sf::Text m_textMode;
 };

@@ -39,6 +39,7 @@ public:
     static float Angle(sf::Vector2f const &v1, sf::Vector2f const &v2);
     static float Slope(sf::Vector2f point1, sf::Vector2f point2);
     static bool isLeft(sf::Vector2f line_point1, sf::Vector2f line_point2, sf::Vector2f point);
+    static bool SimilarDirection(sf::Vector2f const &v1, sf::Vector2f const &v2, float const& percent);
     static float DistanceFromLine(sf::Vector2f line_point1, sf::Vector2f line_point2, sf::Vector2f point);
     static float Determinant(sf::Vector2f const &u, sf::Vector2f const &v);
     static float DotProduct(sf::Vector2f const &u, sf::Vector2f const &v);
@@ -65,7 +66,7 @@ public:
     static bool UniqueInConvexShape(sf::ConvexShape &convexShape, sf::Vector2f &point);
     static sf::ConvexShape CreateConvexShapeFromPointList(std::vector<sf::Vector2f> unsorted_list);
     static sf::Vector2f GetCentroidOfPolygon(sf::ConvexShape polygon);
-    static sf::Vector2f GetCentroidOfRectangle(sf::FloatRect polygon);
+    static sf::Vector2f GetCentroidOfRectangle(sf::FloatRect rectangle);
     static sf::Rect<float> RectFromCenter(sf::Vector2f mid, float half_width, float half_height);
     static sf::Vector2f ClosestPolygonVertex(sf::ConvexShape polygon, sf::Vector2f point);
     static sf::Color ColorGradient(sf::Image &colors, float x);

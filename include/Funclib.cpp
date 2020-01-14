@@ -42,7 +42,12 @@ std::vector<sf::Vector2f> Funclib::WrapPoints(std::vector<sf::Vector2f> *points)
 
     ClearPointsRecursively(startLine, &topPoints, &finalPoints);
     ClearPointsRecursively({startLine.second, startLine.first}, &bottomPoints, &finalPoints);
-
+    size_t i = 2;
+    for (size_t j = 1; i <= finalPoints.size() / 2; i++, j++)
+    {
+        std::swap(finalPoints[i], finalPoints[i + j]);
+    }
+    finalPoints.resize(i);
     return finalPoints;
 }
 
@@ -274,6 +279,17 @@ float vf::Slope(sf::Vector2f point1, sf::Vector2f point2)
 bool vf::isLeft(sf::Vector2f line_point1, sf::Vector2f line_point2, sf::Vector2f point)
 {
     return ((line_point2.x - line_point1.x) * (point.y - line_point1.y) - (line_point2.y - line_point1.y) * (point.x - line_point1.x)) < 0.0f;
+}
+
+bool vf::SimilarDirection(sf::Vector2f const &v1, sf::Vector2f const &v2, float const &percent)
+{
+    sf::Vector2f u1 = vf::Unit(v1);
+    sf::Vector2f u2 = vf::Unit(v2);
+
+    bool similarX = gf::IsInBetween(u1.x, u2.x - u2.x * percent, u2.x + u2.x * percent);
+    bool similarY = gf::IsInBetween(u1.y, u2.y - u2.y * percent, u2.y + u2.y * percent);
+
+    return similarX && similarY;
 }
 
 float vf::DistanceFromLine(sf::Vector2f line_point1, sf::Vector2f line_point2, sf::Vector2f point)

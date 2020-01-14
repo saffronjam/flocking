@@ -1,7 +1,9 @@
 #pragma once
 
 #include <memory>
+
 #include "Boid.hpp"
+#include "InputUtility.hpp"
 
 class FlockingController
 {
@@ -17,7 +19,7 @@ public:
     };
 
 public:
-    FlockingController(int const &nBoids);
+    FlockingController(InputUtility &iu, int const &nBoids);
 
     void Update(sf::Time const &dt);
     void Draw(Graphics &gfx);
@@ -40,15 +42,26 @@ public:
     float &GetSpeedRef() { return m_speed; }
 
     bool &GetDrawBoidsRef() { return m_drawBoids; }
-    bool &GetDrawNeighborRef() { return m_drawNeighborLines; }
+    bool &GetDrawVisibleNeighborRef() { return m_drawVisibleNeighborLines; }
     bool &GetDrawVisionRef() { return m_drawVision; }
+    bool &GetDrawFlocksRef() { return m_drawFlocks; }
+
+    bool *GetNeutralMouseModePtr() { return &m_neutralMouseMode; }
+    bool *GetAttractMouseModePtr() { return &m_attractMouseMode; }
+    bool *GetRepelMouseModePtr() { return &m_repelMouseMode; }
 
 private:
     void Flock();
-    void ComputeBoidsVisibleNeighbors();
+    void ComputeBoidsNeighbors();
+    void ComputeBoidsFlockMates();
+    void IterativeFlockCheck(std::shared_ptr<Boid> const &boid, std::set<std::shared_ptr<Boid>> &currentFlock);
 
 private:
+    InputUtility &m_iu;
+
     std::vector<std::shared_ptr<Boid>> m_allBoids;
+    std::vector<std::set<std::shared_ptr<Boid>>> m_allFlocks;
+    sf::FloatRect m_simulationBox;
 
     std::vector<InteractivePoint> m_globalAttractionPoints;
     std::vector<InteractivePoint> m_globalRepulsionPoints;
@@ -64,6 +77,13 @@ private:
     float m_speed;
 
     bool m_drawBoids;
-    bool m_drawNeighborLines;
+    bool m_drawVisibleNeighborLines;
     bool m_drawVision;
+    bool m_drawFlocks;
+
+    bool m_neutralMouseMode;
+    bool m_attractMouseMode;
+    bool m_repelMouseMode;
+
+    bool m_currentTimer;
 };

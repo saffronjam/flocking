@@ -12,7 +12,7 @@ public:
 
     void Update(sf::Time const &dt);
     void Draw(Graphics &gfx);
-    void DrawLineToNeighbors(Graphics &gfx);
+    void DrawLineToVisibleNeighbors(Graphics &gfx);
     void DrawVisionShape(Graphics &gfx);
 
     void Clamp(sf::FloatRect const &box);
@@ -27,6 +27,7 @@ public:
     float GetCohesionStrength() const { return m_cohesionStrength; }
     float GetSpeed() const { return m_speed; }
     std::pair<sf::Vector2f, sf::Vector2f> GetVisionLimitBorders() const;
+    bool GetInFlock() const { return m_inFlock; }
 
     void SetAcceleration(sf::Vector2f const &acceleration) { m_acceleration = acceleration; }
     void SetSeeingDistance(float const &seeingDistance) { m_seeingDistance = seeingDistance; }
@@ -35,10 +36,14 @@ public:
     void SetAlignmentStrength(float const &alignmentStrength) { m_alignmentStrength = alignmentStrength; }
     void SetCohesionStrength(float const &cohesionStrength) { m_cohesionStrength = cohesionStrength; }
     void SetSpeed(float const &speed) { m_speed = speed; }
+    void SetInFlock(bool const &inFlock) { m_inFlock = inFlock; }
 
-    void AddNeighbor(std::shared_ptr<Boid> boid) { m_neighbors.emplace(boid); }
-    void RemoveNeighbor(std::shared_ptr<Boid> boid) { m_neighbors.erase(boid); }
+    void AddNeighbor(std::shared_ptr<Boid> const &boid) { m_neighbors.emplace(boid); }
+    void RemoveNeighbor(std::shared_ptr<Boid> const &boid) { m_neighbors.erase(boid); }
+    void AddVisibleNeighbor(std::shared_ptr<Boid> const &boid) { m_visibleNeighbors.emplace(boid); }
+    void RemoveVisibleNeighbor(std::shared_ptr<Boid> const &boid) { m_visibleNeighbors.erase(boid); }
     std::set<std::shared_ptr<Boid>> GetNeighbors() { return m_neighbors; }
+    std::set<std::shared_ptr<Boid>> GetVisibleNeighbors() { return m_visibleNeighbors; }
 
     sf::Vector2f Separation();
     sf::Vector2f Alignment();
@@ -71,4 +76,6 @@ private:
     float m_speed;
 
     std::set<std::shared_ptr<Boid>> m_neighbors;
+    std::set<std::shared_ptr<Boid>> m_visibleNeighbors;
+    bool m_inFlock;
 };
