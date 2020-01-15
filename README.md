@@ -1,6 +1,6 @@
 # Flocking Simulation
 
-<img src="https://github.com/viesa/AStarVisualization/blob/master/image.png">
+<img src="https://github.com/viesa/FlockingSimulation/blob/master/image.png">
 
 ## Setting up
 ### Linux
