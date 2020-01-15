@@ -8,7 +8,7 @@ ifeq ($(detected_OS), Windows)
 OUTPUT := main.exe
 LIBLOC := -Llib
 FLAGS := -Iinclude -Wall -g -pthread
-else ifeq ($(detected_OS), Linux)
+else
 OUTPUT := main.out
 LIBLOC := -L/usr/lib/x86_64-linux-gnu
 FLAGS := -Wall -g -pthread
