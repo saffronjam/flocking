@@ -1,11 +1,27 @@
 #include "Boid.h"
 
 Boid::Boid(const sf::Vector2f &position)
-    : m_bodyColor(sf::Color::Red),
-      m_sightRadius(100.0f),
-      m_sightAngle(100.0f)
+    : m_position(position),
+      m_velocity(0.0f, 0.0f),
+      m_acceleration(0.0f, 0.0f),
+      m_minSpeed(1.0f),
+      m_maxSpeed(150.0f),
+      m_separationMultiplier(1.0f),
+      m_alignmentMultiplier(1.0f),
+      m_cohesionMultiplier(1.0f),
+      m_forward(1.0f, 0.0f),
+      m_bodyColor(sf::Color::Red),
+      m_sightRadius(150.0f),
+      m_sightAngle(360.0f)
 {
-    m_voidBody = VoidBody::Create(position);
+}
+
+void Boid::Update()
+{
+    m_velocity += Lib::Constrain(m_acceleration * Clock::Delta().asSeconds(), 0.0f, 10.0f);
+    m_velocity = Lib::Constrain(m_velocity, m_minSpeed, m_maxSpeed);
+    m_position += m_velocity * Clock::Delta().asSeconds();
+    m_acceleration = vl::Null<>();
 }
 
 void Boid::DrawBody() const
@@ -29,11 +45,11 @@ void Boid::DrawBody() const
 
 void Boid::DrawSight() const
 {
-    sf::VertexArray sightArea(sf::PrimitiveType::TriangleFan, 1 + m_sightAngle);
+    sf::VertexArray sightArea(sf::PrimitiveType::TriangleFan, 2 + m_sightAngle);
     sightArea[0] = sf::Vertex(GetPosition(), sf::Color(200, 200, 200, 150));
     sf::Vector2f position = GetPosition();
     sf::Vector2f leftStart = vl::Rotate(GetForward(), Lib::ToRadians(-m_sightAngle / 2.0f), vl::Null<>()) * m_sightRadius + position;
-    for (int i = 1; i < static_cast<int>(m_sightAngle) + 1; i++)
+    for (int i = 1; i < static_cast<int>(m_sightAngle) + 2; i++)
     {
         sightArea[i] = sf::Vertex(vl::Rotate(leftStart, Lib::ToRadians(static_cast<float>(i)), position), sf::Color(40, 40, 40, 30));
     }
@@ -58,21 +74,69 @@ void Boid::DrawVisibleNeighbors() const
 
 void Boid::DrawVelocity() const
 {
-    Camera::DrawLine(GetPosition(), GetPosition() + vl::ConvertTo<sf::Vector2f>(m_voidBody->GetBody()->GetLinearVelocity()) * 5.0f, sf::Color::Green);
+    Camera::DrawLine(GetPosition(), GetPosition() + GetVelocity(), sf::Color::Green);
 }
 
 void Boid::DrawAcceleration() const
 {
 }
 
+sf::Vector2f Boid::GetSeparationForce() const
+{
+    sf::Vector2f average(0.0f, 0.0f);
+    const size_t numNeighbors = GetVisibleNeighbors().size();
+    for (auto &neighbor : GetVisibleNeighbors())
+    {
+        average += GetPosition() - neighbor->GetPosition();
+    }
+    if (numNeighbors > 0)
+    {
+        average /= static_cast<float>(numNeighbors);
+    }
+    return average * 5.0f;
+}
+
+sf::Vector2f Boid::GetAlignmentForce() const
+{
+    sf::Vector2f average(0.0f, 0.0f);
+    const size_t numNeighbors = GetVisibleNeighbors().size();
+    for (auto &neighbor : GetVisibleNeighbors())
+    {
+        average += neighbor->GetVelocity();
+    }
+    if (numNeighbors > 0)
+    {
+        average /= static_cast<float>(numNeighbors);
+    }
+    return average * 10.0f;
+}
+
+sf::Vector2f Boid::GetCohesionForce() const
+{
+    sf::Vector2f average(0.0f, 0.0f);
+    sf::Vector2f steer(0.0f, 0.0f);
+    const size_t numNeighbors = GetVisibleNeighbors().size();
+    for (auto &neighbor : GetVisibleNeighbors())
+    {
+        average += neighbor->GetPosition();
+    }
+    if (numNeighbors > 0)
+    {
+        average /= static_cast<float>(numNeighbors);
+        steer = average - GetPosition();
+    }
+    return steer;
+}
+
 void Boid::ApplyForce(const sf::Vector2f &force) noexcept
 {
-    m_voidBody->GetBody()->ApplyForceToCenter(vl::ConvertTo<b2Vec2>(force), true);
+    m_acceleration += force;
 }
 
 sf::Vector2f Boid::GetForward() const noexcept
 {
-    return vl::Unit(vl::ConvertTo<sf::Vector2f>(m_voidBody->GetBody()->GetLinearVelocity()));
+    sf::Vector2f forwardAttempt = vl::Unit(GetVelocity());
+    return forwardAttempt != vl::Null<>() ? (m_forward = forwardAttempt) : m_forward;
 }
 
 std::pair<sf::Vector2f, sf::Vector2f> Boid::GetSightBounds() const

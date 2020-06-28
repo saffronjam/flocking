@@ -43,10 +43,10 @@ void IApp::Run()
             Draw();
         }
         LogOnly;
+        GuiMgr::Draw();
         LightningMgr::DisplayOccluders();
         LightningMgr::Render();
         LightningMgr::Draw();
-        GuiMgr::Draw();
         Window::Present();
         Clock::Mark();
         Clock::Reset();

@@ -12,6 +12,7 @@
 #include <SFGUI/Label.hpp>
 #include <SFGUI/Scale.hpp>
 #include <SFGUI/Scrollbar.hpp>
+#include <SFGUI/RadioButton.hpp>
 #include <SFGUI/SFGUI.hpp>
 #include <SFGUI/Window.hpp>
 

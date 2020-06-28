@@ -32,7 +32,16 @@ public:
     static sf::Vector2<T> MapPoint(const sf::Vector2<T> &point, sf::Rect<T> from, sf::Rect<T> to) noexcept;
 
     template <typename T>
+    static T Map(const T &value, T lowerFrom, T upperFrom, T lowerTo, T upperTo);
+
+    template <typename T>
+    static T Map(const T &value, std::pair<T, T> from, std::pair<T, T> to);
+
+    template <typename T>
     static T Constrain(const T &value, T from, T to);
+
+    template <typename T>
+    static sf::Vector2<T> Constrain(const sf::Vector2<T> &value, T from, T to);
 
     template <typename T>
     static T ToDegress(const T &radians);
@@ -88,7 +97,33 @@ sf::Vector2<T> Lib::MapPoint(const sf::Vector2<T> &point, sf::Rect<T> from, sf::
 }
 
 template <typename T>
-T Lib::Constrain(const T &value, T from, T to)
+T Lib::Map(const T &value, T lowerFrom, T upperFrom, T lowerTo, T upperTo)
+{
+    if (upperFrom < lowerFrom)
+    {
+        std::swap(lowerFrom, upperFrom);
+    }
+    if (upperTo < lowerTo)
+    {
+        std::swap(lowerTo, upperTo);
+    }
+
+    float diffFrom = upperFrom - lowerFrom;
+    float diffTo = upperTo - lowerTo;
+
+    float diffFromPercent = (value - lowerFrom) / diffFrom;
+
+    return lowerTo + diffTo * diffFromPercent;
+}
+
+template <typename T>
+T Lib::Map(const T &value, std::pair<T, T> from, std::pair<T, T> to)
+{
+    return Lib::Map(value, from.first, from.second, to.first, to.second);
+}
+
+template <typename T>
+T Lib::Lib::Constrain(const T &value, T from, T to)
 {
     if (value < from)
         return from;
@@ -96,6 +131,20 @@ T Lib::Constrain(const T &value, T from, T to)
         return to;
     else
         return value;
+}
+
+template <typename T>
+sf::Vector2<T> Lib::Constrain(const sf::Vector2<T> &vector, T from, T to)
+{
+    if (vl::Length(vector) < from)
+    {
+        return vl::Unit(vector) * from;
+    }
+    else if (vl::Length(vector) > to)
+    {
+        return vl::Unit(vector) * to;
+    }
+    return vector;
 }
 
 template <typename T>
