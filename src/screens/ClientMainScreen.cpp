@@ -20,6 +20,7 @@ void ClientMainScreen::Destroy()
 
 void ClientMainScreen::OnEntry()
 {
+    LightningMgr::SetAmbientLight(sf::Color(255, 255, 255));
 }
 
 void ClientMainScreen::OnExit()
@@ -28,10 +29,12 @@ void ClientMainScreen::OnExit()
 
 void ClientMainScreen::Update()
 {
+    m_boidMgr.Update();
 }
 
 void ClientMainScreen::Draw()
 {
+    m_boidMgr.Draw();
 }
 
 int ClientMainScreen::GetNextScreenIndex() const

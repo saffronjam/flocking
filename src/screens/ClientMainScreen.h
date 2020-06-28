@@ -2,6 +2,8 @@
 
 #include "IScreen.h"
 
+#include "BoidMgr.h"
+
 class AppClient;
 
 class ClientMainScreen : public IScreen
@@ -31,4 +33,6 @@ private:
 
 private:
     AppClient &m_parent;
+
+    BoidMgr m_boidMgr;
 };
