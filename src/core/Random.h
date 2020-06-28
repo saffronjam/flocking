@@ -45,6 +45,11 @@ public:
     }
 
     template <typename T>
+    static sf::Vector2<T> Vec2(const sf::Vector2<T> &low, const sf::Vector2<T> &high)
+    {
+        return Random::Vec2(low.x, low.y, high.x, high.y);
+    }
+    template <typename T>
     static sf::Vector2<T> Vec2(T lowX, T lowY, T highX, T highY)
     {
         float x = Random::Float(lowX, highX);
