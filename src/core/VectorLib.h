@@ -179,5 +179,5 @@ T vl::ConvertTo(const U &in)
 template <typename T>
 bool vl::IsLeft(const sf::Vector2<T> &a, const sf::Vector2<T> &b, const sf::Vector2<T> &point)
 {
-    return (b.x - a.x) * (point.y - a.y) - (b.y - a.y) * (point.x - a.x) > 0.0f;
+    return (b.x - a.x) * (point.y - a.y) - (b.y - a.y) * (point.x - a.x) < 0.0f;
 }
