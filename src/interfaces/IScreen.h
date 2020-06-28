@@ -26,6 +26,7 @@
 #include "BoxCollider.h"
 #include "CircleCollider.h"
 #include "PolygonCollider.h"
+#include "VoidBody.h"
 #include "Random.h"
 #include "Voronoi.h"
 
