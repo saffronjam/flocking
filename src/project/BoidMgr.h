@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unordered_set>
+
 #include "Boid.h"
 #include "Random.h"
 
@@ -10,6 +12,7 @@ public:
 
     void Update();
     void Draw();
+    void DrawQuadTree();
 
     void SetBoidCount(size_t count);
 
@@ -21,14 +24,15 @@ private:
     void CalculateAllVisibleNeighbors();
     sf::Vector2f GetRepulsionBorderForce(const Boid &boid) const noexcept;
 
+    void ComputeQuadTree();
+    void ClearQuadtree() noexcept;
+
 private:
     std::vector<Boid> m_boids;
+    std::vector<std::vector<std::vector<Boid *>>> m_quadtree;
+    std::set<std::pair<size_t, size_t>> m_activeContainers;
+    sf::FloatRect m_quadtreeRect;
+    sf::FloatRect m_quadtreeBox;
 
-    sf::FloatRect m_simulationBox;
     sf::FloatRect m_repulsionBorders;
-
-    // Cached
-    float m_separationMultiplier;
-    float m_alignmentMultiplier;
-    float m_cohesionMultiplier;
 };

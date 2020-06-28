@@ -46,12 +46,12 @@ void Boid::DrawBody() const
 void Boid::DrawSight() const
 {
     sf::VertexArray sightArea(sf::PrimitiveType::TriangleFan, 2 + m_sightAngle);
-    sightArea[0] = sf::Vertex(GetPosition(), sf::Color(200, 200, 200, 150));
+    sightArea[0] = sf::Vertex(GetPosition(), sf::Color(200, 200, 200, 80));
     sf::Vector2f position = GetPosition();
     sf::Vector2f leftStart = vl::Rotate(GetForward(), Lib::ToRadians(-m_sightAngle / 2.0f), vl::Null<>()) * m_sightRadius + position;
     for (int i = 1; i < static_cast<int>(m_sightAngle) + 2; i++)
     {
-        sightArea[i] = sf::Vertex(vl::Rotate(leftStart, Lib::ToRadians(static_cast<float>(i)), position), sf::Color(40, 40, 40, 30));
+        sightArea[i] = sf::Vertex(vl::Rotate(leftStart, Lib::ToRadians(static_cast<float>(i)), position), sf::Color(40, 40, 40, 10));
     }
     Camera::Draw(sightArea);
 }
