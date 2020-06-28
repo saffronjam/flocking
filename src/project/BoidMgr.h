@@ -19,7 +19,6 @@ public:
 
 private:
     void CalculateAllVisibleNeighbors();
-    void ClampBoidsToSimulationBox();
     sf::Vector2f GetRepulsionBorderForce(const Boid &boid) const noexcept;
 
 private:

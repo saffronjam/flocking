@@ -27,7 +27,6 @@ void BoidMgr::Update()
         boid.ApplyForce(GetRepulsionBorderForce(boid));
         boid.Update();
     }
-    ClampBoidsToSimulationBox();
 }
 
 void BoidMgr::Draw()
@@ -87,31 +86,6 @@ void BoidMgr::CalculateAllVisibleNeighbors()
                 boid.AddVisibleNeighbor(&otherBoid);
             }
         }
-    }
-}
-
-void BoidMgr::ClampBoidsToSimulationBox()
-{
-    for (auto &boid : m_boids)
-    {
-        sf::Vector2f position = boid.GetPosition();
-        if (position.x < m_simulationBox.left)
-        {
-            position.x = m_simulationBox.left + m_simulationBox.width;
-        }
-        else if (position.x > m_simulationBox.left + m_simulationBox.width)
-        {
-            position.x = m_simulationBox.left;
-        }
-        if (position.y < m_simulationBox.top)
-        {
-            position.y = m_simulationBox.top + m_simulationBox.height;
-        }
-        else if (position.y > m_simulationBox.top + m_simulationBox.height)
-        {
-            position.y = m_simulationBox.top;
-        }
-        boid.SetPosition(position);
     }
 }
 
