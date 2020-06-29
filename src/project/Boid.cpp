@@ -12,8 +12,16 @@ Boid::Boid(const sf::Vector2f &position)
       m_forward(1.0f, 0.0f),
       m_bodyColor(sf::Color::Red),
       m_sightRadius(150.0f),
-      m_sightAngle(360.0f)
+      m_sightAngle(365.0f),
+      m_visionShape(sf::PrimitiveType::TriangleFan, 361)
 {
+    ReconstructVisionShape();
+    sf::Color color = Random::Color();
+    for (size_t i = 0; i < m_visionShape.getVertexCount(); i++)
+    {
+        m_visionShape[i].color = color;
+        m_visionShape[i].color.a = 5.0f;
+    }
 }
 
 void Boid::Update()
@@ -22,6 +30,9 @@ void Boid::Update()
     m_velocity = Lib::Constrain(m_velocity, m_minSpeed, m_maxSpeed);
     m_position += m_velocity * Clock::Delta().asSeconds();
     m_acceleration = vl::Null<>();
+    m_forward = vl::Unit(GetVelocity());
+
+    ReconstructVisionShape();
 }
 
 void Boid::DrawBody() const
@@ -45,15 +56,7 @@ void Boid::DrawBody() const
 
 void Boid::DrawSight() const
 {
-    sf::VertexArray sightArea(sf::PrimitiveType::TriangleFan, 2 + m_sightAngle);
-    sightArea[0] = sf::Vertex(GetPosition(), sf::Color(200, 200, 200, 80));
-    sf::Vector2f position = GetPosition();
-    sf::Vector2f leftStart = vl::Rotate(GetForward(), Lib::ToRadians(-m_sightAngle / 2.0f), vl::Null<>()) * m_sightRadius + position;
-    for (int i = 1; i < static_cast<int>(m_sightAngle) + 2; i++)
-    {
-        sightArea[i] = sf::Vertex(vl::Rotate(leftStart, Lib::ToRadians(static_cast<float>(i)), position), sf::Color(40, 40, 40, 10));
-    }
-    Camera::Draw(sightArea);
+    Camera::Draw(m_visionShape);
 }
 
 void Boid::DrawNeighbors() const
@@ -79,6 +82,7 @@ void Boid::DrawVelocity() const
 
 void Boid::DrawAcceleration() const
 {
+    Camera::DrawLine(GetPosition(), GetPosition() + GetAcceleration(), sf::Color::Blue);
 }
 
 sf::Vector2f Boid::GetSeparationForce() const
@@ -135,8 +139,7 @@ void Boid::ApplyForce(const sf::Vector2f &force) noexcept
 
 sf::Vector2f Boid::GetForward() const noexcept
 {
-    sf::Vector2f forwardAttempt = vl::Unit(GetVelocity());
-    return forwardAttempt != vl::Null<>() ? (m_forward = forwardAttempt) : m_forward;
+    return m_forward;
 }
 
 std::pair<sf::Vector2f, sf::Vector2f> Boid::GetSightBounds() const
@@ -145,4 +148,25 @@ std::pair<sf::Vector2f, sf::Vector2f> Boid::GetSightBounds() const
     sf::Vector2f forward = GetForward();
     return std::make_pair(vl::Rotate(forward, Lib::ToRadians(-m_sightAngle / 2.0f), vl::Null<>()) * m_sightRadius + position,
                           vl::Rotate(forward, Lib::ToRadians(m_sightAngle / 2.0f), vl::Null<>()) * m_sightRadius + position);
+}
+
+void Boid::SetSightRadius(float radius) noexcept
+{
+    m_sightRadius = radius;
+}
+
+void Boid::SetSightAngle(float angle) noexcept
+{
+    m_sightAngle = angle;
+}
+
+void Boid::ReconstructVisionShape() noexcept
+{
+    m_visionShape[0].position = GetPosition();
+    sf::Vector2f leftStart = vl::Rotate(GetForward(), Lib::ToRadians(-GetSightAngle() / 2.0f), vl::Null<>()) * GetSightRadius() + GetPosition();
+    for (int i = 1; i < 361; i++)
+    {
+        float angle = Lib::Constrain(GetSightAngle() / 360.0f * static_cast<float>(i - 1), 0.0f, 360.0f);
+        m_visionShape[i].position = vl::Rotate(leftStart, Lib::ToRadians(angle), GetPosition());
+    }
 }

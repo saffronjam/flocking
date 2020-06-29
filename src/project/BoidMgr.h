@@ -20,8 +20,21 @@ public:
     void SetAlignmentMultiplier(float multiplier) noexcept;
     void SetCohesionMultiplier(float multiplier) noexcept;
 
+    void SetMinSpeed(float speed) noexcept;
+    void SetMaxSpeed(float speed) noexcept;
+
+    void SetSightRadius(float radius) noexcept;
+    void SetSightAngle(float radius) noexcept;
+
+    void SetDrawBody(bool onoff) noexcept { m_drawBody = onoff; }
+    void SetDrawVision(bool onoff) noexcept { m_drawVision = onoff; }
+    void SetDrawVelocity(bool onoff) noexcept { m_drawVelocity = onoff; }
+    void SetDrawAcceleration(bool onoff) noexcept { m_drawAcceleration = onoff; }
+    void SetDrawQuadtree(bool onoff) noexcept { m_drawQuadtree = onoff; }
+
 private:
-    void CalculateAllVisibleNeighbors();
+    void
+    CalculateAllVisibleNeighbors();
     sf::Vector2f GetRepulsionBorderForce(const Boid &boid) const noexcept;
 
     void ComputeQuadTree();
@@ -33,6 +46,13 @@ private:
     std::set<std::pair<size_t, size_t>> m_activeContainers;
     sf::FloatRect m_quadtreeRect;
     sf::FloatRect m_quadtreeBox;
+    sf::VertexArray m_quadtreeGrid;
 
     sf::FloatRect m_repulsionBorders;
+
+    bool m_drawBody;
+    bool m_drawVision;
+    bool m_drawVelocity;
+    bool m_drawAcceleration;
+    bool m_drawQuadtree;
 };

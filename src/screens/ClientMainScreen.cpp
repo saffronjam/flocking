@@ -25,8 +25,9 @@ void ClientMainScreen::OnEntry()
     // -------------- ALL LABELS ------------------
     auto labelGrid = sfg::Label::Create("Grid");
     auto labelMultipliers = sfg::Label::Create("Multipliers");
+    auto labelVisionSettings = sfg::Label::Create("Vision");
 
-    // -------------- SLEEP DELAY ------------------
+    // -------------- FORCE MULTIPLIERS ------------------
     auto labelSeparation = sfg::Label::Create();
     auto scaleSeparation = sfg::Scale::Create(sfg::Scale::Orientation::HORIZONTAL);
     auto labelAlignment = sfg::Label::Create();
@@ -109,44 +110,107 @@ void ClientMainScreen::OnEntry()
     boxCohesion->Pack(scaleCohesion, false, false);
     boxCohesion->SetRequisition(sf::Vector2f(150.0f, 0.0f));
 
-    auto multipliersBox = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 10.0f);
-    multipliersBox->Pack(labelMultipliers);
-    multipliersBox->Pack(boxSeparation);
-    multipliersBox->Pack(boxAlignment);
-    multipliersBox->Pack(boxCohesion);
+    auto boxMultipliers = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 10.0f);
+    boxMultipliers->Pack(labelMultipliers);
+    boxMultipliers->Pack(boxSeparation);
+    boxMultipliers->Pack(boxAlignment);
+    boxMultipliers->Pack(boxCohesion);
+
+    // ------------- VISION SETTINGS -------------------
+    auto labelSightRadius = sfg::Label::Create();
+    auto scaleSightRadius = sfg::Scale::Create(sfg::Scale::Orientation::HORIZONTAL);
+    auto labelSightAngle = sfg::Label::Create();
+    auto scaleSightAngle = sfg::Scale::Create(sfg::Scale::Orientation::HORIZONTAL);
+
+    auto adjustmentSightRadius = scaleSightRadius->GetAdjustment();
+    adjustmentSightRadius->SetLower(0.0f);
+    adjustmentSightRadius->SetUpper(400.0f);
+    adjustmentSightRadius->SetValue(400.0f);
+    adjustmentSightRadius->SetMinorStep(5.0f);
+    adjustmentSightRadius->SetMajorStep(20.0f);
+    auto adjustmentSightAngle = scaleSightAngle->GetAdjustment();
+    adjustmentSightAngle->SetLower(0.0f);
+    adjustmentSightAngle->SetUpper(365.0f);
+    adjustmentSightAngle->SetValue(365.0f);
+    adjustmentSightAngle->SetMinorStep(5.0f);
+    adjustmentSightAngle->SetMajorStep(5.0f);
+
+    adjustmentSightRadius->GetSignal(sfg::Adjustment::OnChange).Connect([adjustmentSightRadius, labelSightRadius, this] {
+        std::ostringstream oss;
+        oss << std::fixed << std::setprecision(1) << "Radius: " << adjustmentSightRadius->GetValue() << " ";
+        labelSightRadius->SetText(oss.str());
+        m_boidMgr.SetSightRadius(adjustmentSightRadius->GetValue());
+    });
+    adjustmentSightAngle->GetSignal(sfg::Adjustment::OnChange).Connect([adjustmentSightAngle, labelSightAngle, this] {
+        std::ostringstream oss;
+        oss << std::fixed << std::setprecision(1) << "Angle: " << adjustmentSightAngle->GetValue() << " ";
+        labelSightAngle->SetText(oss.str());
+        m_boidMgr.SetSightAngle(adjustmentSightAngle->GetValue());
+    });
+
+    {
+        std::ostringstream oss;
+        oss << std::fixed << std::setprecision(1) << "Radius: " << adjustmentSightRadius->GetValue() << " ";
+        labelSightRadius->SetText(oss.str());
+        m_boidMgr.SetSightRadius(adjustmentSightRadius->GetValue());
+    }
+    {
+        std::ostringstream oss;
+        oss << std::fixed << std::setprecision(1) << "Angle: " << adjustmentSightAngle->GetValue() << " ";
+        labelSightAngle->SetText(oss.str());
+        m_boidMgr.SetSightAngle(adjustmentSightAngle->GetValue());
+    }
+
+    scaleSightRadius->SetRequisition(sf::Vector2f(80.f, 20.f));
+    scaleSightAngle->SetRequisition(sf::Vector2f(80.f, 20.f));
+
+    auto boxSightRadius = sfg::Box::Create(sfg::Box::Orientation::VERTICAL);
+    boxSightRadius->Pack(labelSightRadius, false, false);
+    boxSightRadius->Pack(scaleSightRadius, false, false);
+    boxSightRadius->SetRequisition(sf::Vector2f(150.0f, 0.0f));
+    auto boxSightAngle = sfg::Box::Create(sfg::Box::Orientation::VERTICAL);
+    boxSightAngle->Pack(labelSightAngle, false, false);
+    boxSightAngle->Pack(scaleSightAngle, false, false);
+    boxSightAngle->SetRequisition(sf::Vector2f(150.0f, 0.0f));
+
+    auto boxVisionSettings = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 10.0f);
+    boxVisionSettings->Pack(labelVisionSettings);
+    boxVisionSettings->Pack(boxSightRadius);
+    boxVisionSettings->Pack(boxSightAngle);
 
     // -------------- ALL BUTTONS ------------------
-    auto startButton = sfg::Button::Create("Start");
-    auto restartButton = sfg::Button::Create("Restart");
-    auto resetButton = sfg::Button::Create("Reset");
-    auto pauseButton = sfg::Button::Create("Pause");
-    auto resumeButton = sfg::Button::Create("Resume");
+    auto buttonStart = sfg::Button::Create("Start");
+    auto buttonRestart = sfg::Button::Create("Restart");
+    auto buttonReset = sfg::Button::Create("Reset");
+    auto buttonPause = sfg::Button::Create("Pause");
+    auto buttonResume = sfg::Button::Create("Resume");
 
-    startButton->GetSignal(sfg::Widget::OnLeftClick).Connect([this] {});
-    restartButton->GetSignal(sfg::Widget::OnLeftClick).Connect([this] {});
-    resetButton->GetSignal(sfg::Widget::OnLeftClick).Connect([this] {});
-    pauseButton->GetSignal(sfg::Widget::OnLeftClick).Connect([this] {});
-    resumeButton->GetSignal(sfg::Widget::OnLeftClick).Connect([this] {});
+    buttonStart->GetSignal(sfg::Widget::OnLeftClick).Connect([this] {});
+    buttonRestart->GetSignal(sfg::Widget::OnLeftClick).Connect([this] {});
+    buttonReset->GetSignal(sfg::Widget::OnLeftClick).Connect([this] {});
+    buttonPause->GetSignal(sfg::Widget::OnLeftClick).Connect([this] {});
+    buttonResume->GetSignal(sfg::Widget::OnLeftClick).Connect([this] {});
 
-    auto buttonsBoxRow0 = sfg::Box::Create(sfg::Box::Orientation::HORIZONTAL, 3.0f);
-    auto buttonsBoxRow1 = sfg::Box::Create(sfg::Box::Orientation::HORIZONTAL, 3.0f);
+    auto boxButtonRow0 = sfg::Box::Create(sfg::Box::Orientation::HORIZONTAL, 3.0f);
+    auto boxButtonRow1 = sfg::Box::Create(sfg::Box::Orientation::HORIZONTAL, 3.0f);
 
-    buttonsBoxRow0->Pack(startButton);
-    buttonsBoxRow0->Pack(restartButton);
-    buttonsBoxRow0->Pack(resetButton);
-    buttonsBoxRow1->Pack(pauseButton);
-    buttonsBoxRow1->Pack(resumeButton);
+    boxButtonRow0->Pack(buttonStart);
+    boxButtonRow0->Pack(buttonRestart);
+    boxButtonRow0->Pack(buttonReset);
+    boxButtonRow1->Pack(buttonPause);
+    boxButtonRow1->Pack(buttonResume);
 
-    auto allButtonBox = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
-    allButtonBox->Pack(buttonsBoxRow0, false);
-    allButtonBox->Pack(buttonsBoxRow1, false);
+    auto boxAllButtons = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
+    boxAllButtons->Pack(boxButtonRow0, false);
+    boxAllButtons->Pack(boxButtonRow1, false);
 
     // --------------- SUB BOXES ----------------------
 
     // -------------- ADD TO MAIN BOX ------------------
     auto mainBox = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 15.0f);
-    mainBox->Pack(allButtonBox, false);
-    mainBox->Pack(multipliersBox, false);
+    mainBox->Pack(boxAllButtons, false);
+    mainBox->Pack(boxMultipliers, false);
+    mainBox->Pack(boxVisionSettings, false);
 
     // -------------- ADD TO MAIN WINDOW ------------------
     auto window = sfg::Window::Create(sfg::Window::Style::BACKGROUND);
@@ -164,6 +228,8 @@ void ClientMainScreen::OnExit()
 void ClientMainScreen::Update()
 {
     m_boidMgr.Update();
+    if (Keyboard::IsPressed(sf::Keyboard::Space))
+        log_info("FPS: %f", Clock::GetFPS());
 }
 
 void ClientMainScreen::Draw()

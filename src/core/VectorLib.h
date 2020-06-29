@@ -12,42 +12,61 @@ class vl
 public:
     template <typename T>
     static sf::Vector2<T> LineMiddlePoint(const sf::Vector2<T> &point1, const sf::Vector2<T> &point2);
+
     template <typename T>
     static sf::Vector2<T> Direction(const sf::Vector2<T> &point1, const sf::Vector2<T> &point2);
+
     template <typename T>
     static sf::Vector2<T> Unit(const sf::Vector2<T> &vector);
+
     template <typename T = float>
     static sf::Vector2<T> Null();
+
     template <typename T>
     static sf::Vector2<T> Perpendicular(const sf::Vector2<T> &vector);
+
     template <typename T>
     static sf::Vector2<T> Rotate(const sf::Vector2<T> &vector, float angle, const sf::Vector2<T> &around);
+
+    template <typename T>
+    static sf::Vector2<T> Rotate(const sf::Vector2<T> &vector, const sf::Vector2f &direction, const sf::Vector2<T> &around);
+
     template <typename T>
     static float Length(const sf::Vector2<T> &vector);
+
     template <typename T>
     static float LengthSq(const sf::Vector2<T> &vector);
+
     template <typename T>
     static float Distance(const sf::Vector2<T> &u, const sf::Vector2<T> &v);
+
     template <typename T>
     static void Normalize(sf::Vector2<T> &vector);
+
     template <typename T>
     static float Angle(const sf::Vector2<T> &v1, const sf::Vector2<T> &v2);
+
     template <typename T>
     static float Slope(sf::Vector2<T> point1, sf::Vector2<T> point2);
+
     template <typename T>
     static float DistanceFromLine(sf::Vector2<T> linePoint1, sf::Vector2<T> linePoint2, sf::Vector2<T> point);
+
     template <typename T>
-    static float Determinant(const sf::Vector2<T> &u, const sf::Vector2<T> &v);
-    template <typename T>
-    static float DotProduct(const sf::Vector2<T> &u, const sf::Vector2<T> &v);
+    static T Dot(const sf::Vector2<T> &u, const sf::Vector2<T> &v);
+
     template <typename T>
     static sf::Vector2<T> MapRange(const sf::Vector2<T> &v, T a1, T b1, T a2, T b2);
+
     template <typename T>
     static sf::Vector3<T> MapRange(const sf::Vector3<T> &v, T a1, T b1, T a2, T b2);
+
     template <typename T = float>
     static sf::Vector3<T> ByColor(const sf::Color &color);
+
     template <typename T, typename U>
     static T ConvertTo(const U &in);
+
     template <typename T>
     static bool IsLeft(const sf::Vector2<T> &a, const sf::Vector2<T> &b, const sf::Vector2<T> &point);
 };
@@ -103,6 +122,19 @@ sf::Vector2<T> vl::Rotate(const sf::Vector2<T> &vector, float angle, const sf::V
 }
 
 template <typename T>
+sf::Vector2<T> vl::Rotate(const sf::Vector2<T> &vector, const sf::Vector2f &direction, const sf::Vector2<T> &around)
+{
+    sf::Vector2f right(1.0f, 0.0f);
+
+    float angle = vl::Angle(right, direction);
+    if (direction.y > 0.0f)
+    {
+        angle = 360.0f - angle;
+    }
+    return vl::Rotate(vector, angle, around);
+}
+
+template <typename T>
 float vl::Length(const sf::Vector2<T> &vector)
 {
     return sqrt(vl::LengthSq(vector));
@@ -132,6 +164,12 @@ void vl::Normalize(sf::Vector2<T> &vector)
 }
 
 template <typename T>
+float vl::Angle(const sf::Vector2<T> &v1, const sf::Vector2<T> &v2)
+{
+    return std::acos(vl::Dot(v1, v2) / (vl::Length(v1) * vl::Length(v2)));
+}
+
+template <typename T>
 float vl::Slope(sf::Vector2<T> point1, sf::Vector2<T> point2)
 {
     if (point1.x > point2.x)
@@ -145,6 +183,12 @@ template <typename T>
 float vl::DistanceFromLine(sf::Vector2<T> linePoint1, sf::Vector2<T> linePoint2, sf::Vector2<T> point)
 {
     return abs(((linePoint2.x - linePoint1.x) * (point.y - linePoint1.y) - (linePoint2.y - linePoint1.y) * (point.x - linePoint1.x)) / vl::Length(linePoint2 - linePoint1));
+}
+
+template <typename T>
+T vl::Dot(const sf::Vector2<T> &u, const sf::Vector2<T> &v)
+{
+    return u.x * v.x + u.y * v.y;
 }
 
 template <typename T>

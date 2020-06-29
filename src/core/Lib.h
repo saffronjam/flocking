@@ -43,6 +43,8 @@ public:
     template <typename T>
     static sf::Vector2<T> Constrain(const sf::Vector2<T> &value, T from, T to);
 
+    static void Rotate(sf::Transformable &transformable, const sf::Vector2f &direction);
+
     template <typename T>
     static T ToDegress(const T &radians);
 

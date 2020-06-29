@@ -4,6 +4,7 @@
 
 #include "VoidBody.h"
 #include "Camera.h"
+#include "Random.h"
 
 class Boid
 {
@@ -40,14 +41,22 @@ public:
     sf::Vector2f GetForward() const noexcept;
     std::pair<sf::Vector2f, sf::Vector2f> GetSightBounds() const;
     sf::Vector2f GetVelocity() const noexcept { return m_velocity; };
+    sf::Vector2f GetAcceleration() const noexcept { return m_acceleration; };
     float GetSeparationMultiplier() const noexcept { return m_separationMultiplier; }
     float GetAlignmentMultiplier() const noexcept { return m_alignmentMultiplier; }
     float GetCohesionMultiplier() const noexcept { return m_cohesionMultiplier; }
 
     void SetPosition(const sf::Vector2f &position) noexcept { m_position = position; }
+    void SetSightRadius(float radius) noexcept;
+    void SetSightAngle(float angle) noexcept;
+    void SetMinSpeed(float speed) noexcept { m_minSpeed = speed; }
+    void SetMaxSpeed(float speed) noexcept { m_maxSpeed = speed; }
     void SetSeparationMultiplier(float multiplier) noexcept { m_separationMultiplier = multiplier; }
     void SetAlignmentMultiplier(float multiplier) noexcept { m_alignmentMultiplier = multiplier; }
     void SetCohesionMultiplier(float multiplier) noexcept { m_cohesionMultiplier = multiplier; }
+
+private:
+    void ReconstructVisionShape() noexcept;
 
 private:
     sf::Vector2f m_position;
@@ -69,6 +78,7 @@ private:
     float m_sightRadius;
     float m_sightAngle;
 
-    // Saved because it can't be calculated if velocity is zero
-    mutable sf::Vector2f m_forward;
+    sf::Vector2f m_forward;
+
+    sf::VertexArray m_visionShape;
 };

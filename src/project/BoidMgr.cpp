@@ -1,9 +1,15 @@
 #include "BoidMgr.h"
 
 BoidMgr::BoidMgr()
-    : m_repulsionBorders(-Camera::GetOffset() * 5.0f, sf::Vector2f(Window::GetWidth() - 200.0f, Window::GetHeight()) * 5.0f),
-      m_quadtreeRect(-Camera::GetOffset() * 6.0f, sf::Vector2f(Window::GetWidth() - 200.0f, Window::GetHeight()) * 6.0f),
-      m_quadtreeBox(vl::Null<>(), sf::Vector2f(m_quadtreeRect.width, m_quadtreeRect.width) / 50.0f)
+    : m_repulsionBorders(-Camera::GetOffset() * 12.0f, sf::Vector2f(Window::GetWidth() - 200.0f, Window::GetHeight()) * 12.0f),
+      m_quadtreeRect(-Camera::GetOffset() * 12.0f, sf::Vector2f(Window::GetWidth() - 200.0f, Window::GetHeight()) * 12.0f),
+      m_quadtreeBox(vl::Null<>(), sf::Vector2f(m_quadtreeRect.width, m_quadtreeRect.width) / 250.0f),
+      m_quadtreeGrid(sf::PrimitiveType::Lines),
+      m_drawBody(true),
+      m_drawVision(true),
+      m_drawVelocity(false),
+      m_drawAcceleration(false),
+      m_drawQuadtree(false)
 {
     SetBoidCount(200);
     for (auto &boid : m_boids)
@@ -20,6 +26,22 @@ BoidMgr::BoidMgr()
     {
         col.resize(m_quadtreeRect.height / m_quadtreeBox.height);
     }
+
+    sf::RectangleShape rectShape(sf::Vector2f(m_quadtreeBox.width, m_quadtreeBox.height));
+    rectShape.setFillColor(sf::Color::Transparent);
+    rectShape.setOutlineThickness(1.0f / Camera::GetZoom());
+    rectShape.setOutlineColor(sf::Color(150, 150, 150, 10));
+
+    for (size_t i = 0; i <= m_quadtree.size(); i++)
+    {
+        m_quadtreeGrid.append(sf::Vertex(sf::Vector2f(m_quadtreeRect.left + i * m_quadtreeBox.width, m_quadtreeRect.top), sf::Color(50, 50, 50, 15)));
+        m_quadtreeGrid.append(sf::Vertex(sf::Vector2f(m_quadtreeRect.left + i * m_quadtreeBox.width, m_quadtreeRect.top + m_quadtreeRect.height), sf::Color(50, 50, 50, 15)));
+    }
+    for (size_t j = 0; j <= m_quadtree[0].size(); j++)
+    {
+        m_quadtreeGrid.append(sf::Vertex(sf::Vector2f(m_quadtreeRect.left, m_quadtreeRect.top + j * m_quadtreeBox.height), sf::Color(50, 50, 50, 15)));
+        m_quadtreeGrid.append(sf::Vertex(sf::Vector2f(m_quadtreeRect.left + m_quadtreeRect.width, m_quadtreeRect.top + j * m_quadtreeBox.height), sf::Color(50, 50, 50, 15)));
+    }
 }
 
 void BoidMgr::Update()
@@ -35,8 +57,6 @@ void BoidMgr::Update()
         boid.ApplyForce(GetRepulsionBorderForce(boid));
         boid.Update();
     }
-    if (Keyboard::IsPressed(sf::Keyboard::Space))
-        log_info("FPS: %f", Clock::GetFPS());
 }
 
 void BoidMgr::Draw()
@@ -55,30 +75,25 @@ void BoidMgr::Draw()
     }
     for (auto &boid : m_boids)
     {
+        boid.DrawAcceleration();
+    }
+    for (auto &boid : m_boids)
+    {
         boid.DrawBody();
     }
 
     Camera::DrawRect(m_repulsionBorders, sf::Color::Transparent, true, sf::Color::Red);
+
     DrawQuadTree();
 }
 
 void BoidMgr::DrawQuadTree()
 {
+    Camera::Draw(m_quadtreeGrid);
+
     sf::RectangleShape rectShape(sf::Vector2f(m_quadtreeBox.width, m_quadtreeBox.height));
     rectShape.setFillColor(sf::Color::Transparent);
     rectShape.setOutlineThickness(1.0f / Camera::GetZoom());
-    rectShape.setOutlineColor(sf::Color(255, 255, 255, 20));
-
-    for (size_t i = 0; i < m_quadtree.size(); i++)
-    {
-        for (size_t j = 0; j < m_quadtree[i].size(); j++)
-        {
-            rectShape.setPosition(i * m_quadtreeBox.width + m_quadtreeRect.left,
-                                  j * m_quadtreeBox.height + m_quadtreeRect.top);
-            Camera::Draw(rectShape);
-        }
-    }
-
     rectShape.setOutlineColor(sf::Color::Red);
     for (auto &coord : m_activeContainers)
     {
@@ -94,7 +109,7 @@ void BoidMgr::SetBoidCount(size_t count)
     {
         if (m_boids.size() < count)
         {
-            sf::Vector2f randomPosition = Random::Vec2(-Camera::GetOffset(), sf::Vector2f(Window::GetWidth() - 200.0f, Window::GetHeight()));
+            sf::Vector2f randomPosition = Random::Vec2(m_quadtreeRect.left, m_quadtreeRect.top, m_quadtreeRect.left + m_quadtreeRect.width, m_quadtreeRect.top + m_quadtreeRect.height);
             m_boids.push_back(Boid(randomPosition));
         }
         else
@@ -128,6 +143,38 @@ void BoidMgr::SetCohesionMultiplier(float multiplier) noexcept
     }
 }
 
+void BoidMgr::SetMinSpeed(float speed) noexcept
+{
+    for (auto &boid : m_boids)
+    {
+        boid.SetMinSpeed(speed);
+    }
+}
+
+void BoidMgr::SetMaxSpeed(float speed) noexcept
+{
+    for (auto &boid : m_boids)
+    {
+        boid.SetMaxSpeed(speed);
+    }
+}
+
+void BoidMgr::SetSightRadius(float radius) noexcept
+{
+    for (auto &boid : m_boids)
+    {
+        boid.SetSightRadius(radius);
+    }
+}
+
+void BoidMgr::SetSightAngle(float angle) noexcept
+{
+    for (auto &boid : m_boids)
+    {
+        boid.SetSightAngle(angle);
+    }
+}
+
 void BoidMgr::CalculateAllVisibleNeighbors()
 {
     for (auto &index : m_activeContainers)
@@ -137,13 +184,14 @@ void BoidMgr::CalculateAllVisibleNeighbors()
             boid->ClearNeighbors();
             boid->ClearVisibleNeighbors();
 
-            float radius = boid->GetSightRadius();
-            int nLayersToCheck = static_cast<int>(std::floor(static_cast<int>(static_cast<float>(std::min(m_quadtreeBox.width, m_quadtreeBox.height)) / radius) + 1));
+            int nLayersToCheck = static_cast<int>(std::floor(static_cast<int>(static_cast<float>(boid->GetSightRadius() / std::min(m_quadtreeBox.width, m_quadtreeBox.height))) + 1));
             for (int i = 0; i < nLayersToCheck + 2; i++)
             {
                 for (int j = 0; j < nLayersToCheck + 2; j++)
                 {
-                    for (auto &otherBoid : m_quadtree[index.first - 1 + i][index.second - 1 + j])
+                    size_t x = Lib::Constrain(index.first - 1 + static_cast<size_t>(i), 0ull, m_quadtree.size() - 1);
+                    size_t y = Lib::Constrain(index.second - 1 + static_cast<size_t>(j), 0ull, m_quadtree[x].size() - 1);
+                    for (auto &otherBoid : m_quadtree[x][y])
                     {
                         if (boid == otherBoid)
                             continue;
@@ -196,10 +244,11 @@ sf::Vector2f BoidMgr::GetRepulsionBorderForce(const Boid &boid) const noexcept
     fromBottom = Lib::Constrain(fromBottom, -100.0f, 1.0f);
 
     sf::Vector2f force(0.0f, 0.0f);
-    force.x += std::pow(fromLeft - 1.0f, 8.0f);
-    force.x -= std::pow(fromRight - 1.0f, 8.0f);
-    force.y += std::pow(fromTop - 1.0f, 8.0f);
-    force.y -= std::pow(fromBottom - 1.0f, 8.0f);
+    float lowering = 150.0f;
+    force.x += Lib::Constrain(std::pow(fromLeft - 1.0f, 8.0f) - lowering, 0.0f, std::numeric_limits<float>::infinity());
+    force.y += Lib::Constrain(std::pow(fromTop - 1.0f, 8.0f) - lowering, 0.0f, std::numeric_limits<float>::infinity());
+    force.x -= Lib::Constrain(std::pow(fromRight - 1.0f, 8.0f) - lowering, 0.0f, std::numeric_limits<float>::infinity());
+    force.y -= Lib::Constrain(std::pow(fromBottom - 1.0f, 8.0f) - lowering, 0.0f, std::numeric_limits<float>::infinity());
 
     return force * 25.0f;
 }
@@ -210,6 +259,10 @@ void BoidMgr::ComputeQuadTree()
     {
         const sf::Vector2f &position = boid.GetPosition();
         sf::Vector2i middleIndex((position.x - m_quadtreeRect.left) / m_quadtreeBox.width, (position.y - m_quadtreeRect.top) / m_quadtreeBox.height);
+
+        middleIndex.x = Lib::Constrain(middleIndex.x, 0, static_cast<int>(m_quadtree.size()) - 1);
+        middleIndex.y = Lib::Constrain(middleIndex.y, 0, static_cast<int>(m_quadtree[middleIndex.x].size()) - 1);
+
         m_quadtree[middleIndex.x][middleIndex.y].push_back(&boid);
         m_activeContainers.emplace(middleIndex.x, middleIndex.y);
     }
@@ -217,12 +270,9 @@ void BoidMgr::ComputeQuadTree()
 
 void BoidMgr::ClearQuadtree() noexcept
 {
-    for (auto &col : m_quadtree)
+    for (auto &index : m_activeContainers)
     {
-        for (auto &container : col)
-        {
-            container.clear();
-        }
+        m_quadtree[index.first][index.second].clear();
     }
     m_activeContainers.clear();
 }
