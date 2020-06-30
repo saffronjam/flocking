@@ -26,6 +26,8 @@ void ClientMainScreen::OnEntry()
     auto labelGrid = sfg::Label::Create("Grid");
     auto labelMultipliers = sfg::Label::Create("Multipliers");
     auto labelVisionSettings = sfg::Label::Create("Vision");
+    auto labelSpeedControls = sfg::Label::Create("Speed");
+    auto drawLabel = sfg::Label::Create("Draw");
 
     // -------------- FORCE MULTIPLIERS ------------------
     auto labelSeparation = sfg::Label::Create();
@@ -38,19 +40,16 @@ void ClientMainScreen::OnEntry()
     auto adjustmentSeparation = scaleSeparation->GetAdjustment();
     adjustmentSeparation->SetLower(0.0f);
     adjustmentSeparation->SetUpper(10.0f);
-    adjustmentSeparation->SetValue(1.0f);
     adjustmentSeparation->SetMinorStep(0.1f);
     adjustmentSeparation->SetMajorStep(0.5f);
     auto adjustmentAlignment = scaleAlignment->GetAdjustment();
     adjustmentAlignment->SetLower(0.0f);
     adjustmentAlignment->SetUpper(10.0f);
-    adjustmentAlignment->SetValue(1.0f);
     adjustmentAlignment->SetMinorStep(0.1f);
     adjustmentAlignment->SetMajorStep(0.5f);
     auto adjustmentCohesion = scaleCohesion->GetAdjustment();
     adjustmentCohesion->SetLower(0.0f);
     adjustmentCohesion->SetUpper(10.0f);
-    adjustmentCohesion->SetValue(1.0f);
     adjustmentCohesion->SetMinorStep(0.1f);
     adjustmentCohesion->SetMajorStep(0.5f);
 
@@ -73,25 +72,9 @@ void ClientMainScreen::OnEntry()
         m_boidMgr.SetCohesionMultiplier(adjustmentCohesion->GetValue());
     });
 
-    {
-        std::ostringstream oss;
-        oss << std::fixed << std::setprecision(1) << "Separation: " << adjustmentSeparation->GetValue() << " ";
-        labelSeparation->SetText(oss.str());
-        m_boidMgr.SetSeparationMultiplier(adjustmentSeparation->GetValue());
-    }
-    {
-        std::ostringstream oss;
-        oss << std::fixed << std::setprecision(1) << "Alignment: " << adjustmentAlignment->GetValue() << " ";
-        labelAlignment->SetText(oss.str());
-        m_boidMgr.SetAlignmentMultiplier(adjustmentAlignment->GetValue());
-    }
-    {
-        std::ostringstream oss;
-        oss << std::fixed << std::setprecision(1) << "Cohesion: " << adjustmentCohesion->GetValue() << " ";
-        labelCohesion->SetText(oss.str());
-        m_boidMgr.SetCohesionMultiplier(adjustmentCohesion->GetValue());
-        oss.clear();
-    }
+    adjustmentSeparation->SetValue(1.0f);
+    adjustmentAlignment->SetValue(1.0f);
+    adjustmentCohesion->SetValue(1.0f);
 
     scaleSeparation->SetRequisition(sf::Vector2f(80.f, 20.f));
     scaleAlignment->SetRequisition(sf::Vector2f(80.f, 20.f));
@@ -125,41 +108,29 @@ void ClientMainScreen::OnEntry()
     auto adjustmentSightRadius = scaleSightRadius->GetAdjustment();
     adjustmentSightRadius->SetLower(0.0f);
     adjustmentSightRadius->SetUpper(400.0f);
-    adjustmentSightRadius->SetValue(400.0f);
-    adjustmentSightRadius->SetMinorStep(5.0f);
+    adjustmentSightRadius->SetMinorStep(1.0f);
     adjustmentSightRadius->SetMajorStep(20.0f);
     auto adjustmentSightAngle = scaleSightAngle->GetAdjustment();
     adjustmentSightAngle->SetLower(0.0f);
     adjustmentSightAngle->SetUpper(365.0f);
-    adjustmentSightAngle->SetValue(365.0f);
-    adjustmentSightAngle->SetMinorStep(5.0f);
+    adjustmentSightAngle->SetMinorStep(1.0f);
     adjustmentSightAngle->SetMajorStep(5.0f);
 
     adjustmentSightRadius->GetSignal(sfg::Adjustment::OnChange).Connect([adjustmentSightRadius, labelSightRadius, this] {
         std::ostringstream oss;
-        oss << std::fixed << std::setprecision(1) << "Radius: " << adjustmentSightRadius->GetValue() << " ";
+        oss << std::fixed << std::setprecision(0) << "Radius: " << adjustmentSightRadius->GetValue() << " ";
         labelSightRadius->SetText(oss.str());
         m_boidMgr.SetSightRadius(adjustmentSightRadius->GetValue());
     });
     adjustmentSightAngle->GetSignal(sfg::Adjustment::OnChange).Connect([adjustmentSightAngle, labelSightAngle, this] {
         std::ostringstream oss;
-        oss << std::fixed << std::setprecision(1) << "Angle: " << adjustmentSightAngle->GetValue() << " ";
+        oss << std::fixed << std::setprecision(0) << "Angle: " << adjustmentSightAngle->GetValue() << " ";
         labelSightAngle->SetText(oss.str());
         m_boidMgr.SetSightAngle(adjustmentSightAngle->GetValue());
     });
 
-    {
-        std::ostringstream oss;
-        oss << std::fixed << std::setprecision(1) << "Radius: " << adjustmentSightRadius->GetValue() << " ";
-        labelSightRadius->SetText(oss.str());
-        m_boidMgr.SetSightRadius(adjustmentSightRadius->GetValue());
-    }
-    {
-        std::ostringstream oss;
-        oss << std::fixed << std::setprecision(1) << "Angle: " << adjustmentSightAngle->GetValue() << " ";
-        labelSightAngle->SetText(oss.str());
-        m_boidMgr.SetSightAngle(adjustmentSightAngle->GetValue());
-    }
+    adjustmentSightRadius->SetValue(400.0f);
+    adjustmentSightAngle->SetValue(365.0f);
 
     scaleSightRadius->SetRequisition(sf::Vector2f(80.f, 20.f));
     scaleSightAngle->SetRequisition(sf::Vector2f(80.f, 20.f));
@@ -177,6 +148,62 @@ void ClientMainScreen::OnEntry()
     boxVisionSettings->Pack(labelVisionSettings);
     boxVisionSettings->Pack(boxSightRadius);
     boxVisionSettings->Pack(boxSightAngle);
+
+    // -------------- SPEED CONTROLS -----------------
+    auto labelMinSpeed = sfg::Label::Create();
+    auto scaleMinSpeed = sfg::Scale::Create(sfg::Scale::Orientation::HORIZONTAL);
+    auto labelMaxSpeed = sfg::Label::Create();
+    auto scaleMaxSpeed = sfg::Scale::Create(sfg::Scale::Orientation::HORIZONTAL);
+
+    auto adjustmentMinSpeed = scaleMinSpeed->GetAdjustment();
+    adjustmentMinSpeed->SetLower(0.0f);
+    adjustmentMinSpeed->SetUpper(500.0f);
+    adjustmentMinSpeed->SetMinorStep(1.0f);
+    adjustmentMinSpeed->SetMajorStep(25.0f);
+    auto adjustmentMaxSpeed = scaleMaxSpeed->GetAdjustment();
+    adjustmentMaxSpeed->SetLower(0.0f);
+    adjustmentMaxSpeed->SetUpper(500.0f);
+    adjustmentMaxSpeed->SetMinorStep(1.0f);
+    adjustmentMaxSpeed->SetMajorStep(25.0f);
+
+    adjustmentMinSpeed->GetSignal(sfg::Adjustment::OnChange).Connect([adjustmentMinSpeed, adjustmentMaxSpeed, labelMinSpeed, this] {
+        float minSpeedVal = adjustmentMinSpeed->GetValue();
+        std::ostringstream oss;
+        oss << std::fixed << std::setprecision(0) << "Min speed: " << minSpeedVal << " ";
+        labelMinSpeed->SetText(oss.str());
+        m_boidMgr.SetMinSpeed(minSpeedVal);
+        if (adjustmentMaxSpeed->GetValue() < minSpeedVal)
+            adjustmentMaxSpeed->SetValue(minSpeedVal);
+    });
+    adjustmentMaxSpeed->GetSignal(sfg::Adjustment::OnChange).Connect([adjustmentMinSpeed, adjustmentMaxSpeed, labelMaxSpeed, this] {
+        float maxSpeedVal = adjustmentMaxSpeed->GetValue();
+        std::ostringstream oss;
+        oss << std::fixed << std::setprecision(0) << "Max speed: " << maxSpeedVal << " ";
+        labelMaxSpeed->SetText(oss.str());
+        m_boidMgr.SetMaxSpeed(maxSpeedVal);
+        if (adjustmentMinSpeed->GetValue() > maxSpeedVal)
+            adjustmentMinSpeed->SetValue(maxSpeedVal);
+    });
+
+    adjustmentMinSpeed->SetValue(5.0f);
+    adjustmentMaxSpeed->SetValue(150.0f);
+
+    scaleMinSpeed->SetRequisition(sf::Vector2f(80.f, 20.f));
+    scaleMaxSpeed->SetRequisition(sf::Vector2f(80.f, 20.f));
+
+    auto boxMinSpeed = sfg::Box::Create(sfg::Box::Orientation::VERTICAL);
+    boxMinSpeed->Pack(labelMinSpeed, false, false);
+    boxMinSpeed->Pack(scaleMinSpeed, false, false);
+    boxMinSpeed->SetRequisition(sf::Vector2f(150.0f, 0.0f));
+    auto boxMaxSpeed = sfg::Box::Create(sfg::Box::Orientation::VERTICAL);
+    boxMaxSpeed->Pack(labelMaxSpeed, false, false);
+    boxMaxSpeed->Pack(scaleMaxSpeed, false, false);
+    boxMaxSpeed->SetRequisition(sf::Vector2f(150.0f, 0.0f));
+
+    auto boxSpeedControls = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 10.0f);
+    boxSpeedControls->Pack(labelSpeedControls);
+    boxSpeedControls->Pack(boxMinSpeed);
+    boxSpeedControls->Pack(boxMaxSpeed);
 
     // -------------- ALL BUTTONS ------------------
     auto buttonStart = sfg::Button::Create("Start");
@@ -211,6 +238,7 @@ void ClientMainScreen::OnEntry()
     mainBox->Pack(boxAllButtons, false);
     mainBox->Pack(boxMultipliers, false);
     mainBox->Pack(boxVisionSettings, false);
+    mainBox->Pack(boxSpeedControls, false);
 
     // -------------- ADD TO MAIN WINDOW ------------------
     auto window = sfg::Window::Create(sfg::Window::Style::BACKGROUND);
