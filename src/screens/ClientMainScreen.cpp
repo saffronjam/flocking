@@ -27,7 +27,7 @@ void ClientMainScreen::OnEntry()
     auto labelMultipliers = sfg::Label::Create("Multipliers");
     auto labelVisionSettings = sfg::Label::Create("Vision");
     auto labelSpeedControls = sfg::Label::Create("Speed");
-    auto drawLabel = sfg::Label::Create("Draw");
+    auto labelDraw = sfg::Label::Create("Draw");
 
     // -------------- FORCE MULTIPLIERS ------------------
     auto labelSeparation = sfg::Label::Create();
@@ -205,40 +205,45 @@ void ClientMainScreen::OnEntry()
     boxSpeedControls->Pack(boxMinSpeed);
     boxSpeedControls->Pack(boxMaxSpeed);
 
-    // -------------- ALL BUTTONS ------------------
-    auto buttonStart = sfg::Button::Create("Start");
-    auto buttonRestart = sfg::Button::Create("Restart");
-    auto buttonReset = sfg::Button::Create("Reset");
-    auto buttonPause = sfg::Button::Create("Pause");
-    auto buttonResume = sfg::Button::Create("Resume");
+    // -------------- DRAW CHECKBUTTON -----------------
+    auto checkButtonDrawBody = sfg::CheckButton::Create("Body");
+    auto checkButtonDrawVision = sfg::CheckButton::Create("Vision");
+    auto checkButtonDrawNeighbors = sfg::CheckButton::Create("Neighbors");
+    auto checkButtonDrawVelocity = sfg::CheckButton::Create("Velocity");
+    auto checkButtonDrawAcceleration = sfg::CheckButton::Create("Acceleration");
+    auto checkButtonDrawGrid = sfg::CheckButton::Create("Grid");
 
-    buttonStart->GetSignal(sfg::Widget::OnLeftClick).Connect([this] {});
-    buttonRestart->GetSignal(sfg::Widget::OnLeftClick).Connect([this] {});
-    buttonReset->GetSignal(sfg::Widget::OnLeftClick).Connect([this] {});
-    buttonPause->GetSignal(sfg::Widget::OnLeftClick).Connect([this] {});
-    buttonResume->GetSignal(sfg::Widget::OnLeftClick).Connect([this] {});
+    checkButtonDrawBody->GetSignal(sfg::CheckButton::OnToggle).Connect([this, checkButtonDrawBody] { m_boidMgr.SetDrawBody(checkButtonDrawBody->IsActive()); });
+    checkButtonDrawVision->GetSignal(sfg::CheckButton::OnToggle).Connect([this, checkButtonDrawVision] { m_boidMgr.SetDrawVision(checkButtonDrawVision->IsActive()); });
+    checkButtonDrawNeighbors->GetSignal(sfg::CheckButton::OnToggle).Connect([this, checkButtonDrawNeighbors] { m_boidMgr.SetDrawNeighbors(checkButtonDrawNeighbors->IsActive()); });
+    checkButtonDrawVelocity->GetSignal(sfg::CheckButton::OnToggle).Connect([this, checkButtonDrawVelocity] { m_boidMgr.SetDrawVelocity(checkButtonDrawVelocity->IsActive()); });
+    checkButtonDrawAcceleration->GetSignal(sfg::CheckButton::OnToggle).Connect([this, checkButtonDrawAcceleration] { m_boidMgr.SetDrawAcceleration(checkButtonDrawAcceleration->IsActive()); });
+    checkButtonDrawGrid->GetSignal(sfg::CheckButton::OnToggle).Connect([this, checkButtonDrawGrid] { m_boidMgr.SetDrawQuadtree(checkButtonDrawGrid->IsActive()); });
 
-    auto boxButtonRow0 = sfg::Box::Create(sfg::Box::Orientation::HORIZONTAL, 3.0f);
-    auto boxButtonRow1 = sfg::Box::Create(sfg::Box::Orientation::HORIZONTAL, 3.0f);
+    checkButtonDrawBody->SetActive(true);
+    checkButtonDrawVision->SetActive(false);
+    checkButtonDrawNeighbors->SetActive(false);
+    checkButtonDrawVelocity->SetActive(false);
+    checkButtonDrawAcceleration->SetActive(false);
+    checkButtonDrawGrid->SetActive(false);
 
-    boxButtonRow0->Pack(buttonStart);
-    boxButtonRow0->Pack(buttonRestart);
-    boxButtonRow0->Pack(buttonReset);
-    boxButtonRow1->Pack(buttonPause);
-    boxButtonRow1->Pack(buttonResume);
-
-    auto boxAllButtons = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
-    boxAllButtons->Pack(boxButtonRow0, false);
-    boxAllButtons->Pack(boxButtonRow1, false);
+    auto boxDraw = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 10.0f);
+    boxDraw->Pack(labelDraw);
+    boxDraw->Pack(checkButtonDrawBody);
+    boxDraw->Pack(checkButtonDrawVision);
+    boxDraw->Pack(checkButtonDrawNeighbors);
+    boxDraw->Pack(checkButtonDrawVelocity);
+    boxDraw->Pack(checkButtonDrawAcceleration);
+    boxDraw->Pack(checkButtonDrawGrid);
 
     // --------------- SUB BOXES ----------------------
 
     // -------------- ADD TO MAIN BOX ------------------
     auto mainBox = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 15.0f);
-    mainBox->Pack(boxAllButtons, false);
     mainBox->Pack(boxMultipliers, false);
     mainBox->Pack(boxVisionSettings, false);
     mainBox->Pack(boxSpeedControls, false);
+    mainBox->Pack(boxDraw, false);
 
     // -------------- ADD TO MAIN WINDOW ------------------
     auto window = sfg::Window::Create(sfg::Window::Style::BACKGROUND);

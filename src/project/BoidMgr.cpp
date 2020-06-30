@@ -6,7 +6,8 @@ BoidMgr::BoidMgr()
       m_quadtreeBox(vl::Null<>(), sf::Vector2f(m_quadtreeRect.width, m_quadtreeRect.width) / 250.0f),
       m_quadtreeGrid(sf::PrimitiveType::Lines),
       m_drawBody(true),
-      m_drawVision(true),
+      m_drawVision(false),
+      m_drawNeighbors(false),
       m_drawVelocity(false),
       m_drawAcceleration(false),
       m_drawQuadtree(false)
@@ -61,30 +62,39 @@ void BoidMgr::Update()
 
 void BoidMgr::Draw()
 {
-    for (auto &boid : m_boids)
-    {
-        boid.DrawSight();
-    }
-    for (auto &boid : m_boids)
-    {
-        boid.DrawVisibleNeighbors();
-    }
-    for (auto &boid : m_boids)
-    {
-        boid.DrawVelocity();
-    }
-    for (auto &boid : m_boids)
-    {
-        boid.DrawAcceleration();
-    }
-    for (auto &boid : m_boids)
-    {
-        boid.DrawBody();
-    }
+    if (m_drawVision)
+        for (auto &boid : m_boids)
+        {
+            boid.DrawSight();
+        }
 
-    Camera::DrawRect(m_repulsionBorders, sf::Color::Transparent, true, sf::Color::Red);
+    if (m_drawNeighbors)
 
-    DrawQuadTree();
+        for (auto &boid : m_boids)
+        {
+            boid.DrawVisibleNeighbors();
+        }
+
+    if (m_drawVelocity)
+        for (auto &boid : m_boids)
+        {
+            boid.DrawVelocity();
+        }
+
+    if (m_drawAcceleration)
+        for (auto &boid : m_boids)
+        {
+            boid.DrawAcceleration();
+        }
+
+    if (m_drawBody)
+        for (auto &boid : m_boids)
+        {
+            boid.DrawBody();
+        }
+
+    if (m_drawQuadtree)
+        DrawQuadTree();
 }
 
 void BoidMgr::DrawQuadTree()
@@ -109,7 +119,7 @@ void BoidMgr::SetBoidCount(size_t count)
     {
         if (m_boids.size() < count)
         {
-            sf::Vector2f randomPosition = Random::Vec2(m_quadtreeRect.left, m_quadtreeRect.top, m_quadtreeRect.left + m_quadtreeRect.width, m_quadtreeRect.top + m_quadtreeRect.height);
+            sf::Vector2f randomPosition = Random::Vec2(-100.0f, -100.0f, 100.0f, 100.0f);
             m_boids.push_back(Boid(randomPosition));
         }
         else

@@ -28,6 +28,7 @@ public:
 
     void SetDrawBody(bool onoff) noexcept { m_drawBody = onoff; }
     void SetDrawVision(bool onoff) noexcept { m_drawVision = onoff; }
+    void SetDrawNeighbors(bool onoff) noexcept { m_drawNeighbors = onoff; }
     void SetDrawVelocity(bool onoff) noexcept { m_drawVelocity = onoff; }
     void SetDrawAcceleration(bool onoff) noexcept { m_drawAcceleration = onoff; }
     void SetDrawQuadtree(bool onoff) noexcept { m_drawQuadtree = onoff; }
@@ -52,6 +53,7 @@ private:
 
     bool m_drawBody;
     bool m_drawVision;
+    bool m_drawNeighbors;
     bool m_drawVelocity;
     bool m_drawAcceleration;
     bool m_drawQuadtree;
