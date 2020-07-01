@@ -13,6 +13,7 @@ public:
     void Update();
     void Draw();
     void DrawQuadTree();
+    void DrawFlockConvexHull();
 
     void SetBoidCount(size_t count);
 
@@ -31,18 +32,21 @@ public:
     void SetDrawNeighbors(bool onoff) noexcept { m_drawNeighbors = onoff; }
     void SetDrawVelocity(bool onoff) noexcept { m_drawVelocity = onoff; }
     void SetDrawAcceleration(bool onoff) noexcept { m_drawAcceleration = onoff; }
+    void SetDrawFlocks(bool onoff) noexcept { m_drawFlocks = onoff; }
     void SetDrawQuadtree(bool onoff) noexcept { m_drawQuadtree = onoff; }
 
 private:
-    void
-    CalculateAllVisibleNeighbors();
-    sf::Vector2f GetRepulsionBorderForce(const Boid &boid) const noexcept;
+    void ComputeAllVisibleNeighbors();
+    void ComputeFlocks();
+    void IterativeFlockCheck(const Boid &boid, std::set<Boid *> &currentFlock);
+    sf::Vector2f GetRepulsionBorderForce(const Boid &boid) const;
 
     void ComputeQuadTree();
     void ClearQuadtree() noexcept;
 
 private:
     std::vector<Boid> m_boids;
+    std::vector<std::set<Boid *>> m_flocks;
     std::vector<std::vector<std::vector<Boid *>>> m_quadtree;
     std::set<std::pair<size_t, size_t>> m_activeContainers;
     sf::FloatRect m_quadtreeRect;
@@ -56,5 +60,6 @@ private:
     bool m_drawNeighbors;
     bool m_drawVelocity;
     bool m_drawAcceleration;
+    bool m_drawFlocks;
     bool m_drawQuadtree;
 };

@@ -13,7 +13,9 @@ Boid::Boid(const sf::Vector2f &position)
       m_bodyColor(sf::Color::Red),
       m_sightRadius(150.0f),
       m_sightAngle(365.0f),
-      m_visionShape(sf::PrimitiveType::TriangleFan, 361)
+      m_inFlock(false),
+      m_visionShape(sf::PrimitiveType::TriangleFan, 361),
+      m_bodyShape(3)
 {
     ReconstructVisionShape();
     sf::Color color = Random::Color();
@@ -22,6 +24,18 @@ Boid::Boid(const sf::Vector2f &position)
         m_visionShape[i].color = color;
         m_visionShape[i].color.a = 5.0f;
     }
+
+    sf::Vector2f front = GetForward() * 12.0f;
+    sf::Vector2f backLeft = vl::Rotate(-front, Lib::ToRadians(-30.0f), vl::Null<>());
+    sf::Vector2f backRight = vl::Rotate(-front, Lib::ToRadians(30.0f), vl::Null<>());
+
+    m_bodyShape.setPoint(0, front);
+    m_bodyShape.setPoint(1, backLeft);
+    m_bodyShape.setPoint(2, backRight);
+
+    m_bodyShape.setFillColor(sf::Color(255, 0, 0, 150));
+    m_bodyShape.setOutlineThickness(1.0f);
+    m_bodyShape.setOutlineColor(sf::Color(50, 50, 50, 200));
 }
 
 void Boid::Update()
@@ -32,26 +46,15 @@ void Boid::Update()
     m_acceleration = vl::Null<>();
     m_forward = vl::Unit(GetVelocity());
 
+    m_bodyShape.setPosition(m_position);
+    Lib::Rotate(m_bodyShape, m_forward);
+
     ReconstructVisionShape();
 }
 
 void Boid::DrawBody() const
 {
-    sf::Vector2f front = GetForward() * 8.0f;
-    sf::Vector2f backLeft = vl::Rotate(-front, Lib::ToRadians(-30.0f), vl::Null<>());
-    sf::Vector2f backRight = vl::Rotate(-front, Lib::ToRadians(30.0f), vl::Null<>());
-
-    sf::Vector2f position = GetPosition();
-    sf::VertexArray triangle(sf::PrimitiveType::Triangles, 3);
-    triangle[0].position = front + position;
-    triangle[1].position = backLeft + position;
-    triangle[2].position = backRight + position;
-
-    triangle[0].color = m_bodyColor;
-    triangle[1].color = m_bodyColor;
-    triangle[2].color = m_bodyColor;
-
-    Camera::Draw(triangle);
+    Camera::Draw(m_bodyShape);
 }
 
 void Boid::DrawSight() const

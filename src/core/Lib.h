@@ -28,6 +28,8 @@ public:
 
     static sf::Vector2f Mid(const sf::ConvexShape &polygon) noexcept;
 
+    static sf::Vector2f Mid(const std::vector<sf::Vector2f> &polygonPoints) noexcept;
+
     template <typename T>
     static sf::Vector2<T> MapPoint(const sf::Vector2<T> &point, sf::Rect<T> from, sf::Rect<T> to) noexcept;
 

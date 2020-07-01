@@ -129,7 +129,7 @@ void ClientMainScreen::OnEntry()
         m_boidMgr.SetSightAngle(adjustmentSightAngle->GetValue());
     });
 
-    adjustmentSightRadius->SetValue(400.0f);
+    adjustmentSightRadius->SetValue(150.0f);
     adjustmentSightAngle->SetValue(365.0f);
 
     scaleSightRadius->SetRequisition(sf::Vector2f(80.f, 20.f));
@@ -157,12 +157,12 @@ void ClientMainScreen::OnEntry()
 
     auto adjustmentMinSpeed = scaleMinSpeed->GetAdjustment();
     adjustmentMinSpeed->SetLower(0.0f);
-    adjustmentMinSpeed->SetUpper(500.0f);
+    adjustmentMinSpeed->SetUpper(1000.0f);
     adjustmentMinSpeed->SetMinorStep(1.0f);
     adjustmentMinSpeed->SetMajorStep(25.0f);
     auto adjustmentMaxSpeed = scaleMaxSpeed->GetAdjustment();
     adjustmentMaxSpeed->SetLower(0.0f);
-    adjustmentMaxSpeed->SetUpper(500.0f);
+    adjustmentMaxSpeed->SetUpper(1000.0f);
     adjustmentMaxSpeed->SetMinorStep(1.0f);
     adjustmentMaxSpeed->SetMajorStep(25.0f);
 
@@ -185,8 +185,8 @@ void ClientMainScreen::OnEntry()
             adjustmentMinSpeed->SetValue(maxSpeedVal);
     });
 
-    adjustmentMinSpeed->SetValue(5.0f);
-    adjustmentMaxSpeed->SetValue(150.0f);
+    adjustmentMinSpeed->SetValue(1.0f);
+    adjustmentMaxSpeed->SetValue(100.0f);
 
     scaleMinSpeed->SetRequisition(sf::Vector2f(80.f, 20.f));
     scaleMaxSpeed->SetRequisition(sf::Vector2f(80.f, 20.f));
@@ -211,6 +211,7 @@ void ClientMainScreen::OnEntry()
     auto checkButtonDrawNeighbors = sfg::CheckButton::Create("Neighbors");
     auto checkButtonDrawVelocity = sfg::CheckButton::Create("Velocity");
     auto checkButtonDrawAcceleration = sfg::CheckButton::Create("Acceleration");
+    auto checkButtonDrawFlocks = sfg::CheckButton::Create("Flocks");
     auto checkButtonDrawGrid = sfg::CheckButton::Create("Grid");
 
     checkButtonDrawBody->GetSignal(sfg::CheckButton::OnToggle).Connect([this, checkButtonDrawBody] { m_boidMgr.SetDrawBody(checkButtonDrawBody->IsActive()); });
@@ -218,6 +219,7 @@ void ClientMainScreen::OnEntry()
     checkButtonDrawNeighbors->GetSignal(sfg::CheckButton::OnToggle).Connect([this, checkButtonDrawNeighbors] { m_boidMgr.SetDrawNeighbors(checkButtonDrawNeighbors->IsActive()); });
     checkButtonDrawVelocity->GetSignal(sfg::CheckButton::OnToggle).Connect([this, checkButtonDrawVelocity] { m_boidMgr.SetDrawVelocity(checkButtonDrawVelocity->IsActive()); });
     checkButtonDrawAcceleration->GetSignal(sfg::CheckButton::OnToggle).Connect([this, checkButtonDrawAcceleration] { m_boidMgr.SetDrawAcceleration(checkButtonDrawAcceleration->IsActive()); });
+    checkButtonDrawFlocks->GetSignal(sfg::CheckButton::OnToggle).Connect([this, checkButtonDrawFlocks] { m_boidMgr.SetDrawFlocks(checkButtonDrawFlocks->IsActive()); });
     checkButtonDrawGrid->GetSignal(sfg::CheckButton::OnToggle).Connect([this, checkButtonDrawGrid] { m_boidMgr.SetDrawQuadtree(checkButtonDrawGrid->IsActive()); });
 
     checkButtonDrawBody->SetActive(true);
@@ -225,6 +227,7 @@ void ClientMainScreen::OnEntry()
     checkButtonDrawNeighbors->SetActive(false);
     checkButtonDrawVelocity->SetActive(false);
     checkButtonDrawAcceleration->SetActive(false);
+    checkButtonDrawFlocks->SetActive(false);
     checkButtonDrawGrid->SetActive(false);
 
     auto boxDraw = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 10.0f);
@@ -234,6 +237,7 @@ void ClientMainScreen::OnEntry()
     boxDraw->Pack(checkButtonDrawNeighbors);
     boxDraw->Pack(checkButtonDrawVelocity);
     boxDraw->Pack(checkButtonDrawAcceleration);
+    boxDraw->Pack(checkButtonDrawFlocks);
     boxDraw->Pack(checkButtonDrawGrid);
 
     // --------------- SUB BOXES ----------------------

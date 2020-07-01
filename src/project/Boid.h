@@ -45,6 +45,8 @@ public:
     float GetSeparationMultiplier() const noexcept { return m_separationMultiplier; }
     float GetAlignmentMultiplier() const noexcept { return m_alignmentMultiplier; }
     float GetCohesionMultiplier() const noexcept { return m_cohesionMultiplier; }
+    sf::FloatRect GetBoundingBox() { return m_bodyShape.getLocalBounds(); }
+    bool InFlock() const noexcept { return m_inFlock; }
 
     void SetPosition(const sf::Vector2f &position) noexcept { m_position = position; }
     void SetSightRadius(float radius) noexcept;
@@ -54,6 +56,7 @@ public:
     void SetSeparationMultiplier(float multiplier) noexcept { m_separationMultiplier = multiplier; }
     void SetAlignmentMultiplier(float multiplier) noexcept { m_alignmentMultiplier = multiplier; }
     void SetCohesionMultiplier(float multiplier) noexcept { m_cohesionMultiplier = multiplier; }
+    void SetInFlock(bool inFlock) const noexcept { m_inFlock = inFlock; }
 
 private:
     void ReconstructVisionShape() noexcept;
@@ -80,5 +83,8 @@ private:
 
     sf::Vector2f m_forward;
 
+    mutable bool m_inFlock;
+
     sf::VertexArray m_visionShape;
+    sf::ConvexShape m_bodyShape;
 };

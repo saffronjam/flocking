@@ -10,6 +10,7 @@ BoidMgr::BoidMgr()
       m_drawNeighbors(false),
       m_drawVelocity(false),
       m_drawAcceleration(false),
+      m_drawFlocks(false),
       m_drawQuadtree(false)
 {
     SetBoidCount(200);
@@ -49,7 +50,9 @@ void BoidMgr::Update()
 {
     ClearQuadtree();
     ComputeQuadTree();
-    CalculateAllVisibleNeighbors();
+    if (m_drawFlocks)
+        ComputeFlocks();
+    ComputeAllVisibleNeighbors();
     for (auto &boid : m_boids)
     {
         boid.ApplyForce(boid.GetSeparationForce() * boid.GetSeparationMultiplier());
@@ -95,6 +98,9 @@ void BoidMgr::Draw()
 
     if (m_drawQuadtree)
         DrawQuadTree();
+
+    if (m_drawFlocks)
+        DrawFlockConvexHull();
 }
 
 void BoidMgr::DrawQuadTree()
@@ -110,6 +116,34 @@ void BoidMgr::DrawQuadTree()
         rectShape.setPosition(coord.first * m_quadtreeBox.width + m_quadtreeRect.left,
                               coord.second * m_quadtreeBox.height + m_quadtreeRect.top);
         Camera::Draw(rectShape);
+    }
+}
+
+void BoidMgr::DrawFlockConvexHull()
+{
+    if (true)
+    {
+        for (auto flock : m_flocks)
+        {
+            std::vector<sf::Vector2f> flockPoints;
+            for (auto &boid : flock)
+            {
+                flockPoints.push_back(boid->GetPosition());
+            }
+            if (flockPoints.size() < 3)
+                continue;
+
+            std::vector<sf::Vector2f> wrapped(Lib::WrapPoints(flockPoints));
+
+            sf::VertexArray points(sf::PrimitiveType::Lines, wrapped.size());
+            for (size_t i = 0; i < wrapped.size() - 1; i++)
+            {
+                points[i].position = wrapped[i];
+            }
+            points[wrapped.size() - 1].position = wrapped.front();
+
+            Camera::Draw(points);
+        }
     }
 }
 
@@ -185,7 +219,7 @@ void BoidMgr::SetSightAngle(float angle) noexcept
     }
 }
 
-void BoidMgr::CalculateAllVisibleNeighbors()
+void BoidMgr::ComputeAllVisibleNeighbors()
 {
     for (auto &index : m_activeContainers)
     {
@@ -194,13 +228,14 @@ void BoidMgr::CalculateAllVisibleNeighbors()
             boid->ClearNeighbors();
             boid->ClearVisibleNeighbors();
 
-            int nLayersToCheck = static_cast<int>(std::floor(static_cast<int>(static_cast<float>(boid->GetSightRadius() / std::min(m_quadtreeBox.width, m_quadtreeBox.height))) + 1));
+            int nLayersToCheck = static_cast<int>(std::floor(static_cast<int>(static_cast<float>(boid->GetSightRadius() / std::min(m_quadtreeBox.width, m_quadtreeBox.height)) * 2.0f) + 1));
             for (int i = 0; i < nLayersToCheck + 2; i++)
             {
                 for (int j = 0; j < nLayersToCheck + 2; j++)
                 {
-                    size_t x = Lib::Constrain(index.first - 1 + static_cast<size_t>(i), 0ull, m_quadtree.size() - 1);
-                    size_t y = Lib::Constrain(index.second - 1 + static_cast<size_t>(j), 0ull, m_quadtree[x].size() - 1);
+                    size_t x = Lib::Constrain(index.first - nLayersToCheck / 2 + static_cast<size_t>(i), 0ull, m_quadtree.size() - 1);
+                    size_t y = Lib::Constrain(index.second - nLayersToCheck / 2 + static_cast<size_t>(j), 0ull, m_quadtree[x].size() - 1);
+
                     for (auto &otherBoid : m_quadtree[x][y])
                     {
                         if (boid == otherBoid)
@@ -235,7 +270,37 @@ void BoidMgr::CalculateAllVisibleNeighbors()
     }
 }
 
-sf::Vector2f BoidMgr::GetRepulsionBorderForce(const Boid &boid) const noexcept
+void BoidMgr::ComputeFlocks()
+{
+    m_flocks.clear();
+    for (auto &boid : m_boids)
+    {
+        boid.SetInFlock(false);
+    }
+    for (auto &boid : m_boids)
+    {
+        if (!boid.InFlock())
+        {
+            std::set<Boid *> currentFlock;
+            IterativeFlockCheck(boid, currentFlock);
+            m_flocks.push_back(currentFlock);
+        }
+    }
+}
+
+void BoidMgr::IterativeFlockCheck(const Boid &boid, std::set<Boid *> &currentFlock)
+{
+    for (auto &neighbor : boid.GetNeighbors())
+    {
+        if (currentFlock.emplace(const_cast<Boid *>(neighbor)).second)
+        {
+            neighbor->SetInFlock(true);
+            IterativeFlockCheck(*neighbor, currentFlock);
+        }
+    }
+}
+
+sf::Vector2f BoidMgr::GetRepulsionBorderForce(const Boid &boid) const
 {
     const sf::Vector2f &position = boid.GetPosition();
     auto &box = m_repulsionBorders;
