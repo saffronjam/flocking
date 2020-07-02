@@ -59,7 +59,12 @@ void BoidMgr::Update()
         boid.ApplyForce(boid.GetAlignmentForce() * boid.GetAlignmentMultiplier());
         boid.ApplyForce(boid.GetCohesionForce() * boid.GetCohesionMultiplier());
         boid.ApplyForce(GetRepulsionBorderForce(boid));
+    }
+    for (auto &boid : m_boids)
+    {
         boid.Update();
+        if (!m_drawAcceleration)
+            boid.ResetForce();
     }
 }
 
@@ -88,6 +93,7 @@ void BoidMgr::Draw()
         for (auto &boid : m_boids)
         {
             boid.DrawAcceleration();
+            boid.ResetForce();
         }
 
     if (m_drawBody)
@@ -302,7 +308,7 @@ void BoidMgr::IterativeFlockCheck(const Boid &boid, std::set<Boid *> &currentFlo
 
 sf::Vector2f BoidMgr::GetRepulsionBorderForce(const Boid &boid) const
 {
-    const sf::Vector2f &position = boid.GetPosition();
+    const sf::Vector2f position = boid.GetPosition();
     auto &box = m_repulsionBorders;
 
     const auto xRange = std::make_pair(box.left, box.left + box.width);
@@ -319,13 +325,13 @@ sf::Vector2f BoidMgr::GetRepulsionBorderForce(const Boid &boid) const
     fromBottom = Lib::Constrain(fromBottom, -100.0f, 1.0f);
 
     sf::Vector2f force(0.0f, 0.0f);
-    float lowering = 150.0f;
-    force.x += Lib::Constrain(std::pow(fromLeft - 1.0f, 8.0f) - lowering, 0.0f, std::numeric_limits<float>::infinity());
-    force.y += Lib::Constrain(std::pow(fromTop - 1.0f, 8.0f) - lowering, 0.0f, std::numeric_limits<float>::infinity());
-    force.x -= Lib::Constrain(std::pow(fromRight - 1.0f, 8.0f) - lowering, 0.0f, std::numeric_limits<float>::infinity());
-    force.y -= Lib::Constrain(std::pow(fromBottom - 1.0f, 8.0f) - lowering, 0.0f, std::numeric_limits<float>::infinity());
+    float lowering = 1.0f;
+    force.x += Lib::Constrain(std::pow((fromLeft - 1.0f) / 2.0f, 128.0f) - lowering, 0.0f, std::numeric_limits<float>::infinity());
+    force.y += Lib::Constrain(std::pow((fromTop - 1.0f) / 2.0f, 128.0f) - lowering, 0.0f, std::numeric_limits<float>::infinity());
+    force.x -= Lib::Constrain(std::pow((fromRight - 1.0f) / 2.0f, 128.0f) - lowering, 0.0f, std::numeric_limits<float>::infinity());
+    force.y -= Lib::Constrain(std::pow((fromBottom - 1.0f) / 2.0f, 128.0f) - lowering, 0.0f, std::numeric_limits<float>::infinity());
 
-    return force * 25.0f;
+    return force;
 }
 
 void BoidMgr::ComputeQuadTree()

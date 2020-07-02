@@ -5,7 +5,8 @@ Boid::Boid(const sf::Vector2f &position)
       m_velocity(0.0f, 0.0f),
       m_acceleration(0.0f, 0.0f),
       m_minSpeed(1.0f),
-      m_maxSpeed(150.0f),
+      m_maxSpeed(100.0f),
+      m_maxForce(300.0f),
       m_separationMultiplier(1.0f),
       m_alignmentMultiplier(1.0f),
       m_cohesionMultiplier(1.0f),
@@ -40,10 +41,9 @@ Boid::Boid(const sf::Vector2f &position)
 
 void Boid::Update()
 {
-    m_velocity += Lib::Constrain(m_acceleration * Clock::Delta().asSeconds(), 0.0f, 10.0f);
+    m_velocity += m_acceleration * Clock::Delta().asSeconds();
     m_velocity = Lib::Constrain(m_velocity, m_minSpeed, m_maxSpeed);
     m_position += m_velocity * Clock::Delta().asSeconds();
-    m_acceleration = vl::Null<>();
     m_forward = vl::Unit(GetVelocity());
 
     m_bodyShape.setPosition(m_position);
@@ -85,7 +85,7 @@ void Boid::DrawVelocity() const
 
 void Boid::DrawAcceleration() const
 {
-    Camera::DrawLine(GetPosition(), GetPosition() + GetAcceleration(), sf::Color::Blue);
+    Camera::DrawLine(GetPosition(), GetPosition() + m_acceleration, sf::Color::Blue);
 }
 
 sf::Vector2f Boid::GetSeparationForce() const
@@ -94,13 +94,22 @@ sf::Vector2f Boid::GetSeparationForce() const
     const size_t numNeighbors = GetVisibleNeighbors().size();
     for (auto &neighbor : GetVisibleNeighbors())
     {
-        average += GetPosition() - neighbor->GetPosition();
+        auto diff = GetPosition() - neighbor->GetPosition();
+        if (vl::LengthSq(diff) != 0.0f)
+        {
+            average += diff / m_sightRadius;
+        }
+        else
+        {
+            average += sf::Vector2f(100.0f, 0.0f);
+        }
     }
     if (numNeighbors > 0)
     {
         average /= static_cast<float>(numNeighbors);
+        average = vl::SetLength(average, m_maxForce);
     }
-    return average * 5.0f;
+    return average;
 }
 
 sf::Vector2f Boid::GetAlignmentForce() const
@@ -114,8 +123,9 @@ sf::Vector2f Boid::GetAlignmentForce() const
     if (numNeighbors > 0)
     {
         average /= static_cast<float>(numNeighbors);
+        average = vl::SetLength(average, m_maxForce);
     }
-    return average * 10.0f;
+    return average;
 }
 
 sf::Vector2f Boid::GetCohesionForce() const
@@ -130,7 +140,8 @@ sf::Vector2f Boid::GetCohesionForce() const
     if (numNeighbors > 0)
     {
         average /= static_cast<float>(numNeighbors);
-        steer = average - GetPosition();
+        average = vl::SetLength(average - GetPosition(), m_maxForce);
+        steer = average;
     }
     return steer;
 }

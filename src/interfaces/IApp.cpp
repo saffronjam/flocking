@@ -35,7 +35,6 @@ void IApp::Run()
         GuiMgr::Update();
         Camera::Update();
         Window::Clear();
-        LightningMgr::ClearOccluders();
         try
         {
             Update();
@@ -44,9 +43,6 @@ void IApp::Run()
         }
         LogOnly;
         GuiMgr::Draw();
-        LightningMgr::DisplayOccluders();
-        LightningMgr::Render();
-        LightningMgr::Draw();
         Window::Present();
         Clock::Mark();
         Clock::Reset();

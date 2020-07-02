@@ -44,6 +44,9 @@ public:
     static void Normalize(sf::Vector2<T> &vector);
 
     template <typename T>
+    static sf::Vector2<T> SetLength(const sf::Vector2<T> &vector, float length);
+
+    template <typename T>
     static float Angle(const sf::Vector2<T> &v1, const sf::Vector2<T> &v2);
 
     template <typename T>
@@ -161,6 +164,12 @@ void vl::Normalize(sf::Vector2<T> &vector)
         vector.x /= length;
         vector.y /= length;
     }
+}
+
+template <typename T>
+sf::Vector2<T> vl::SetLength(const sf::Vector2<T> &vector, float length)
+{
+    return vl::Unit(vector) * length;
 }
 
 template <typename T>

@@ -34,6 +34,7 @@ public:
     std::set<const Boid *> GetVisibleNeighbors() const noexcept { return m_visibleNeighbors; }
 
     void ApplyForce(const sf::Vector2f &force) noexcept;
+    void ResetForce() noexcept { m_acceleration = vl::Null<>(); }
 
     const sf::Vector2f &GetPosition() const noexcept { return m_position; }
     float GetSightRadius() const noexcept { return m_sightRadius; }
@@ -42,6 +43,7 @@ public:
     std::pair<sf::Vector2f, sf::Vector2f> GetSightBounds() const;
     sf::Vector2f GetVelocity() const noexcept { return m_velocity; };
     sf::Vector2f GetAcceleration() const noexcept { return m_acceleration; };
+    float GetMaxSpeed() const noexcept { return m_maxSpeed; }
     float GetSeparationMultiplier() const noexcept { return m_separationMultiplier; }
     float GetAlignmentMultiplier() const noexcept { return m_alignmentMultiplier; }
     float GetCohesionMultiplier() const noexcept { return m_cohesionMultiplier; }
@@ -68,6 +70,7 @@ private:
 
     float m_minSpeed;
     float m_maxSpeed;
+    float m_maxForce;
 
     float m_separationMultiplier;
     float m_alignmentMultiplier;
