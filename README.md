@@ -1,8 +1,6 @@
 # V-Flocking
 Visualizing flocking simluation
 
-Includes controls to change strength for Separation, Alignment and Cohesion, boid speed and how to visualize it.
-
 <img src="https://github.com/viesa/V-Flocking/blob/master/preview0.png">
 <img src="https://github.com/viesa/V-Flocking/blob/master/preview1.png">
 <img src="https://github.com/viesa/V-Flocking/blob/master/preview2.png">
