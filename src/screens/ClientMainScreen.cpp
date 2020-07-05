@@ -29,6 +29,48 @@ void ClientMainScreen::OnEntry()
     auto labelSpeedControls = sfg::Label::Create("Speed");
     auto labelDraw = sfg::Label::Create("Draw");
 
+    // ------------------ PAUSE RESUME BUTTONS ------------------
+    auto buttonPauseResume = sfg::Button::Create("Pause");
+
+    buttonPauseResume->GetSignal(sfg::Button::OnLeftClick).Connect([this, buttonPauseResume] {
+        if (m_boidMgr.IsPaused())
+        {
+            m_boidMgr.Resume();
+            buttonPauseResume->SetLabel("Pause");
+        }
+        else
+        {
+            m_boidMgr.Pause();
+            buttonPauseResume->SetLabel("Resume");
+        }
+    });
+
+    // --------------  NUMBER OF BOIDS CONTROLLER ------------------
+    auto labelBoidNum = sfg::Label::Create();
+    auto scaleBoidNum = sfg::Scale::Create(sfg::Scale::Orientation::HORIZONTAL);
+
+    auto adjustmentBoidNum = scaleBoidNum->GetAdjustment();
+    adjustmentBoidNum->SetLower(0.0f);
+    adjustmentBoidNum->SetUpper(500.0f);
+    adjustmentBoidNum->SetMinorStep(5.0f);
+    adjustmentBoidNum->SetMajorStep(25.0f);
+
+    adjustmentBoidNum->GetSignal(sfg::Adjustment::OnChange).Connect([adjustmentBoidNum, labelBoidNum, this] {
+        std::ostringstream oss;
+        oss << std::fixed << std::setprecision(1) << "Number of boids: " << adjustmentBoidNum->GetValue() << " ";
+        labelBoidNum->SetText(oss.str());
+        m_boidMgr.SetBoidCount(adjustmentBoidNum->GetValue());
+    });
+
+    adjustmentBoidNum->SetValue(100.0f);
+
+    scaleBoidNum->SetRequisition(sf::Vector2f(80.f, 20.f));
+
+    auto boxBoidNum = sfg::Box::Create(sfg::Box::Orientation::VERTICAL);
+    boxBoidNum->Pack(labelBoidNum, false, false);
+    boxBoidNum->Pack(scaleBoidNum, false, false);
+    boxBoidNum->SetRequisition(sf::Vector2f(150.0f, 0.0f));
+
     // -------------- FORCE MULTIPLIERS ------------------
     auto labelSeparation = sfg::Label::Create();
     auto scaleSeparation = sfg::Scale::Create(sfg::Scale::Orientation::HORIZONTAL);
@@ -185,7 +227,7 @@ void ClientMainScreen::OnEntry()
             adjustmentMinSpeed->SetValue(maxSpeedVal);
     });
 
-    adjustmentMinSpeed->SetValue(1.0f);
+    adjustmentMinSpeed->SetValue(10.0f);
     adjustmentMaxSpeed->SetValue(100.0f);
 
     scaleMinSpeed->SetRequisition(sf::Vector2f(80.f, 20.f));
@@ -230,20 +272,30 @@ void ClientMainScreen::OnEntry()
     checkButtonDrawFlocks->SetActive(false);
     checkButtonDrawGrid->SetActive(false);
 
-    auto boxDraw = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 10.0f);
+    auto boxDrawLeftCol = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
+    auto boxDrawRightCol = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
+    boxDrawLeftCol->Pack(checkButtonDrawBody);
+    boxDrawLeftCol->Pack(checkButtonDrawVision);
+    boxDrawLeftCol->Pack(checkButtonDrawVelocity);
+    boxDrawLeftCol->Pack(checkButtonDrawAcceleration);
+    boxDrawRightCol->Pack(checkButtonDrawNeighbors);
+    boxDrawRightCol->Pack(checkButtonDrawFlocks);
+    boxDrawRightCol->Pack(checkButtonDrawGrid);
+
+    auto boxDrawChoices = sfg::Box::Create(sfg::Box::Orientation::HORIZONTAL, 2.0f);
+    boxDrawChoices->Pack(boxDrawLeftCol);
+    boxDrawChoices->Pack(boxDrawRightCol);
+
+    auto boxDraw = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 2.0f);
     boxDraw->Pack(labelDraw);
-    boxDraw->Pack(checkButtonDrawBody);
-    boxDraw->Pack(checkButtonDrawVision);
-    boxDraw->Pack(checkButtonDrawNeighbors);
-    boxDraw->Pack(checkButtonDrawVelocity);
-    boxDraw->Pack(checkButtonDrawAcceleration);
-    boxDraw->Pack(checkButtonDrawFlocks);
-    boxDraw->Pack(checkButtonDrawGrid);
+    boxDraw->Pack(boxDrawChoices);
 
     // --------------- SUB BOXES ----------------------
 
     // -------------- ADD TO MAIN BOX ------------------
     auto mainBox = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 15.0f);
+    mainBox->Pack(buttonPauseResume, false);
+    mainBox->Pack(boxBoidNum, false);
     mainBox->Pack(boxMultipliers, false);
     mainBox->Pack(boxVisionSettings, false);
     mainBox->Pack(boxSpeedControls, false);
@@ -265,8 +317,6 @@ void ClientMainScreen::OnExit()
 void ClientMainScreen::Update()
 {
     m_boidMgr.Update();
-    if (Keyboard::IsPressed(sf::Keyboard::Space))
-        log_info("FPS: %f", Clock::GetFPS());
 }
 
 void ClientMainScreen::Draw()

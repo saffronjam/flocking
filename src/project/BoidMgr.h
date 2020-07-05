@@ -15,6 +15,10 @@ public:
     void DrawQuadTree();
     void DrawFlockConvexHull();
 
+    void Pause() noexcept;
+    void Resume() noexcept;
+    bool IsPaused() const noexcept { return m_paused; }
+
     void SetBoidCount(size_t count);
 
     void SetSeparationMultiplier(float multiplier) noexcept;
@@ -54,6 +58,8 @@ private:
     sf::VertexArray m_quadtreeGrid;
 
     sf::FloatRect m_repulsionBorders;
+
+    bool m_paused;
 
     bool m_drawBody;
     bool m_drawVision;

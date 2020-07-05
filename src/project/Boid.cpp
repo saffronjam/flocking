@@ -48,8 +48,6 @@ void Boid::Update()
 
     m_bodyShape.setPosition(m_position);
     Lib::Rotate(m_bodyShape, m_forward);
-
-    ReconstructVisionShape();
 }
 
 void Boid::DrawBody() const

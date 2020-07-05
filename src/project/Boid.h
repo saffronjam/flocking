@@ -60,7 +60,6 @@ public:
     void SetCohesionMultiplier(float multiplier) noexcept { m_cohesionMultiplier = multiplier; }
     void SetInFlock(bool inFlock) const noexcept { m_inFlock = inFlock; }
 
-private:
     void ReconstructVisionShape() noexcept;
 
 private:

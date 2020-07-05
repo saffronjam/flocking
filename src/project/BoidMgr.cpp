@@ -5,6 +5,7 @@ BoidMgr::BoidMgr()
       m_quadtreeRect(-Camera::GetOffset() * 12.0f, sf::Vector2f(Window::GetWidth() - 200.0f, Window::GetHeight()) * 12.0f),
       m_quadtreeBox(vl::Null<>(), sf::Vector2f(m_quadtreeRect.width, m_quadtreeRect.width) / 250.0f),
       m_quadtreeGrid(sf::PrimitiveType::Lines),
+      m_paused(false),
       m_drawBody(true),
       m_drawVision(false),
       m_drawNeighbors(false),
@@ -53,18 +54,26 @@ void BoidMgr::Update()
     if (m_drawFlocks)
         ComputeFlocks();
     ComputeAllVisibleNeighbors();
+
     for (auto &boid : m_boids)
     {
-        boid.ApplyForce(boid.GetSeparationForce() * boid.GetSeparationMultiplier());
-        boid.ApplyForce(boid.GetAlignmentForce() * boid.GetAlignmentMultiplier());
-        boid.ApplyForce(boid.GetCohesionForce() * boid.GetCohesionMultiplier());
-        boid.ApplyForce(GetRepulsionBorderForce(boid));
+        if (!m_paused)
+        {
+            boid.ApplyForce(boid.GetSeparationForce() * boid.GetSeparationMultiplier());
+            boid.ApplyForce(boid.GetAlignmentForce() * boid.GetAlignmentMultiplier());
+            boid.ApplyForce(boid.GetCohesionForce() * boid.GetCohesionMultiplier());
+            boid.ApplyForce(GetRepulsionBorderForce(boid));
+        }
+        boid.ReconstructVisionShape();
     }
-    for (auto &boid : m_boids)
+    if (!m_paused)
     {
-        boid.Update();
-        if (!m_drawAcceleration)
-            boid.ResetForce();
+        for (auto &boid : m_boids)
+        {
+            boid.Update();
+            if (!m_drawAcceleration)
+                boid.ResetForce();
+        }
     }
 }
 
@@ -153,13 +162,23 @@ void BoidMgr::DrawFlockConvexHull()
     }
 }
 
+void BoidMgr::Pause() noexcept
+{
+    m_paused = true;
+}
+
+void BoidMgr::Resume() noexcept
+{
+    m_paused = false;
+}
+
 void BoidMgr::SetBoidCount(size_t count)
 {
     while (m_boids.size() != count)
     {
         if (m_boids.size() < count)
         {
-            sf::Vector2f randomPosition = Random::Vec2(-100.0f, -100.0f, 100.0f, 100.0f);
+            sf::Vector2f randomPosition = Random::Vec2(-400.0f, -400.0f, 400.0f, 400.0f);
             m_boids.push_back(Boid(randomPosition));
         }
         else
