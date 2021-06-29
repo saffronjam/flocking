@@ -2,10 +2,11 @@
 Visualizing flocking simluation
 
 <p align="center">
- <img src="https://img.shields.io/badge/language-C++-blue.svg" alt="language">
- <img src="https://img.shields.io/badge/std-C++17-blue.svg" alt="c++std">
- <img src="https://img.shields.io/badge/mvsc-2017+-ff69b4.svg" alt="msvc2017+">
- <img src="https://img.shields.io/badge/gcc-8.0+-ff69b4.svg" alt="gcc-8.0+">
+  <img src="https://github.com/saffronjam/Fractals/workflows/Build-Windows/badge.svg" alt="build">
+  <img src="https://img.shields.io/badge/language-C++-blue.svg" alt="language">
+  <img src="https://img.shields.io/badge/std-C++20-blue.svg" alt="c++std">
+  <img src="https://img.shields.io/badge/mvsc-2019+-ff69b4.svg" alt="msvc2017+">
+  <img src="https://img.shields.io/badge/gcc-10.0+-ff69b4.svg" alt="gcc-8.0+">
 </p>
 
 ## Preview
@@ -17,7 +18,12 @@ Visualizing flocking simluation
   <img src="https://github.com/saffronjam/Flocking/blob/master/preview2.png" width="75%">
 </p>
   
-## Setting up
+## Trying out yourself
+Pre-built executable are only available for Windows
+
+Start ``example/windows/Client.exe``
+ 
+## Setting up for development
 <p align="center">
     <img src="https://github.com/saffronjam/SaffronEngine2D/blob/master/startCMakeProjectCLion.png" width="30%">
     <img width="2%">
