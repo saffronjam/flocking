@@ -26,8 +26,8 @@ Boid::Boid(const sf::Vector2f &position) :
 	}
 
 	const sf::Vector2f front = GetForward() * 12.0f;
-	const sf::Vector2f backLeft = VecUtils::Rotate(-front, GenUtils::ToRadians(-30.0f), VecUtils::Null<>());
-	const sf::Vector2f backRight = VecUtils::Rotate(-front, GenUtils::ToRadians(30.0f), VecUtils::Null<>());
+	const sf::Vector2f backLeft = VecUtils::Rotate(-front, GenUtils::Radians(-30.0f), VecUtils::Null<>());
+	const sf::Vector2f backRight = VecUtils::Rotate(-front, GenUtils::Radians(30.0f), VecUtils::Null<>());
 
 	_bodyShape.setPoint(0, front);
 	_bodyShape.setPoint(1, backLeft);
@@ -42,7 +42,7 @@ Boid::Boid(const sf::Vector2f &position) :
 
 void Boid::Update()
 {
-	const auto dt = Global::Clock::GetFrameTime();
+	const auto dt = Global::Clock::FrameTime();
 
 	_velocity += _acceleration * dt.asSeconds();
 	_velocity = VecUtils::Constrain(_velocity, _minSpeed, _maxSpeed);
@@ -132,8 +132,8 @@ Pair<sf::Vector2f, sf::Vector2f> Boid::GetSightBounds() const
 {
 	const sf::Vector2f position = GetPosition();
 	const sf::Vector2f forward = GetForward();
-	return CreatePair(VecUtils::Rotate(forward, GenUtils::ToRadians(-_sightAngle / 2.0f), VecUtils::Null<>()) * _sightRadius + position,
-					  VecUtils::Rotate(forward, GenUtils::ToRadians(_sightAngle / 2.0f), VecUtils::Null<>()) * _sightRadius + position);
+	return CreatePair(VecUtils::Rotate(forward, GenUtils::Radians(-_sightAngle / 2.0f), VecUtils::Null<>()) * _sightRadius + position,
+					  VecUtils::Rotate(forward, GenUtils::Radians(_sightAngle / 2.0f), VecUtils::Null<>()) * _sightRadius + position);
 }
 
 void Boid::SetSightRadius(float radius)
@@ -149,11 +149,11 @@ void Boid::SetSightAngle(float angle)
 void Boid::ComputeVisionShape()
 {
 	_visionShape[0].position = GetPosition();
-	const sf::Vector2f leftStart = VecUtils::Rotate(GetForward(), GenUtils::ToRadians(-GetSightAngle() / 2.0f), VecUtils::Null<>()) * GetSightRadius() + GetPosition();
+	const sf::Vector2f leftStart = VecUtils::Rotate(GetForward(), GenUtils::Radians(-GetSightAngle() / 2.0f), VecUtils::Null<>()) * GetSightRadius() + GetPosition();
 	for ( int i = 1; i < 361; i++ )
 	{
 		float angle = GenUtils::Constrain(GetSightAngle() / 360.0f * static_cast<float>(i - 1), 0.0f, 360.0f);
-		_visionShape[i].position = VecUtils::Rotate(leftStart, GenUtils::ToRadians(angle), GetPosition());
+		_visionShape[i].position = VecUtils::Rotate(leftStart, GenUtils::Radians(angle), GetPosition());
 	}
 }
 }

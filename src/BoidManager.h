@@ -53,7 +53,7 @@ private:
 
 	void ComputeAllVisibleNeighbors();
 	void ComputeFlocks();
-	void IterativeFlockCheck(const Boid &boid, Set<Boid *> &currentFlock);
+	void IterativeFlockCheck(const Boid &boid, TreeSet<Boid *> &currentFlock);
 	sf::Vector2f GetRepulsionBorderForce(const Boid &boid) const;
 
 	void ComputeQuadTree();
@@ -66,18 +66,18 @@ private:
 	void ComputeFlockLinesVA();
 	void ComputeActiveQuadTreeGridVA();
 
-	static void ComputeNeighborsLinesVAHelper(sf::VertexArray &va, const ArrayList<Boid> &boids, bool onlyVisible);
-	static void ComputePhysicsLinesVAHelper(sf::VertexArray &va, const ArrayList<Boid> &boids, bool velocity);
+	static void ComputeNeighborsLinesVAHelper(sf::VertexArray &va, const List<Boid> &boids, bool onlyVisible);
+	static void ComputePhysicsLinesVAHelper(sf::VertexArray &va, const List<Boid> &boids, bool velocity);
 
 private:
 	Camera &_camera;
 
 	sf::Vector2f _gridOffset = { 1000.0f, 600.0f };
 
-	ArrayList<Boid> _boids;
-	ArrayList<Set<Boid *>> _flocks;
-	Set<Boid> _inFlock;
-	ArrayList<ArrayList<ArrayList<Boid *>>> _quadtree;
+	List<Boid> _boids;
+	List<TreeSet<Boid *>> _flocks;
+	TreeSet<Boid> _inFlock;
+	List<List<List<Boid *>>> _quadtree;
 
 	sf::VertexArray _neighborLinesVA{ sf::PrimitiveType::Lines };
 	bool _wantComputeNeighborLines = true;
@@ -96,7 +96,7 @@ private:
 
 	sf::FloatRect _quadtreeRect;
 	sf::FloatRect _quadtreeBox;
-	Set<Pair<int, int>> _activeQuadtreeContainers;
+	TreeSet<Pair<int, int>> _activeQuadtreeContainers;
 	sf::VertexArray _quadtreeGridVA{ sf::PrimitiveType::Lines };
 	sf::VertexArray _activeQuadtreeGridVA{ sf::PrimitiveType::Quads };
 	bool _wantComputeActiveQuadtreeGrid = true;
