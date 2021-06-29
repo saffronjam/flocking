@@ -6,16 +6,16 @@
 
 namespace Se
 {
-class ProjectApplication : public App
+class ProjectApp : public App
 {
 public:
-	explicit ProjectApplication(const Properties &properties);
+	explicit ProjectApp(const AppProperties& properties);
 
 	void OnInit() override;
 
 	void OnUpdate() override;
 
 private:
-	std::shared_ptr<ProjectLayer> _projectLayer;
+	Shared<ProjectLayer> _projectLayer;
 };
 }

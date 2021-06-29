@@ -23,8 +23,8 @@ public:
 	void AddVisibleNeighbor(const Boid *boid) { _visibleNeighbors.emplace(boid); }
 	void ClearNeighbors() { _neighbors.clear(); }
 	void ClearVisibleNeighbors() { _visibleNeighbors.clear(); }
-	const Set<const Boid *> &GetNeighbors() const { return _neighbors; }
-	const Set<const Boid *> &GetVisibleNeighbors() const { return _visibleNeighbors; }
+	const TreeSet<const Boid *> &GetNeighbors() const { return _neighbors; }
+	const TreeSet<const Boid *> &GetVisibleNeighbors() const { return _visibleNeighbors; }
 
 	void ApplyForce(const sf::Vector2f &force);
 	void ResetForce() { _acceleration = VecUtils::Null<>(); }
@@ -82,8 +82,8 @@ private:
 	float _alignmentMultiplier;
 	float _cohesionMultiplier;
 
-	Set<const Boid *> _neighbors;
-	Set<const Boid *> _visibleNeighbors;
+	TreeSet<const Boid *> _neighbors;
+	TreeSet<const Boid *> _visibleNeighbors;
 
 	sf::Color _bodyColor{ sf::Color::Red };
 	sf::Color _visionShapeColor{ Random::Color() };

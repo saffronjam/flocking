@@ -144,7 +144,7 @@ void BoidManager::OnGuiRender()
 		}
 	}
 	Gui::BeginPropertyGrid("NoBoids");
-	if ( Gui::Property("Boid Count", _noBoids, 1, 200, 1, Gui::PropertyFlag_Slider) )
+	if ( Gui::Property("Boid Count", _noBoids, 1, 200, 1, GuiPropertyFlag_Slider) )
 	{
 		SetBoidCount(_noBoids);
 	}
@@ -153,15 +153,15 @@ void BoidManager::OnGuiRender()
 	ImGui::Separator();
 
 	Gui::BeginPropertyGrid("Forces");
-	if ( Gui::Property("Separation", _separationMultiplier, 0.0f, 10.0f, 0.1f, Gui::PropertyFlag_Slider) )
+	if ( Gui::Property("Separation", _separationMultiplier, 0.0f, 10.0f, 0.1f, GuiPropertyFlag_Slider) )
 	{
 		SetSeparationMultiplier(_separationMultiplier);
 	}
-	if ( Gui::Property("Alignment", _alignmentMultiplier, 0.0f, 10.0f, 0.1f, Gui::PropertyFlag_Slider) )
+	if ( Gui::Property("Alignment", _alignmentMultiplier, 0.0f, 10.0f, 0.1f, GuiPropertyFlag_Slider) )
 	{
 		SetAlignmentMultiplier(_alignmentMultiplier);
 	}
-	if ( Gui::Property("Cohesion", _cohesionMultiplier, 0.0f, 10.0f, 0.1f, Gui::PropertyFlag_Slider) )
+	if ( Gui::Property("Cohesion", _cohesionMultiplier, 0.0f, 10.0f, 0.1f, GuiPropertyFlag_Slider) )
 	{
 		SetCohesionMultiplier(_cohesionMultiplier);
 	}
@@ -170,7 +170,7 @@ void BoidManager::OnGuiRender()
 	ImGui::Separator();
 
 	Gui::BeginPropertyGrid("Speed");
-	if ( Gui::Property("Min Speed", _minSpeed, 0.0f, 1000.0f, 1.0f, Gui::PropertyFlag_Slider) )
+	if ( Gui::Property("Min Speed", _minSpeed, 0.0f, 1000.0f, 1.0f, GuiPropertyFlag_Slider) )
 	{
 		SetMinSpeed(_minSpeed);
 		if ( _minSpeed > _maxSpeed )
@@ -178,7 +178,7 @@ void BoidManager::OnGuiRender()
 			SetMaxSpeed(_maxSpeed = _minSpeed);
 		}
 	}
-	if ( Gui::Property("Max Speed", _maxSpeed, 0.0f, 1000.0f, 1.0f, Gui::PropertyFlag_Slider) )
+	if ( Gui::Property("Max Speed", _maxSpeed, 0.0f, 1000.0f, 1.0f, GuiPropertyFlag_Slider) )
 	{
 		SetMaxSpeed(_maxSpeed);
 		if ( _maxSpeed < _minSpeed )
@@ -191,11 +191,11 @@ void BoidManager::OnGuiRender()
 	ImGui::Separator();
 
 	Gui::BeginPropertyGrid("Vision");
-	if ( Gui::Property("Vision Radius", _visionRadius, 0.0f, 400.0, 1.0f, Gui::PropertyFlag_Slider) )
+	if ( Gui::Property("Vision Radius", _visionRadius, 0.0f, 400.0, 1.0f, GuiPropertyFlag_Slider) )
 	{
 		SetVisionRadius(_visionRadius);
 	}
-	if ( Gui::Property("Vision Angle", _visionAngle, 0.0f, 360.0f, 1.0f, Gui::PropertyFlag_Slider) )
+	if ( Gui::Property("Vision Angle", _visionAngle, 0.0f, 360.0f, 1.0f, GuiPropertyFlag_Slider) )
 	{
 		SetVisionAngle(_visionAngle);
 	}
@@ -323,7 +323,7 @@ void BoidManager::SetBoidCount(int count)
 	{
 		if ( _boids.size() < count )
 		{
-			const auto &[camTopLeft, camBottomRight] = _camera.GetViewport();
+			const auto &[camTopLeft, camBottomRight] = _camera.Viewport();
 
 			const sf::Vector2f constrainedTopLeft{
 				GenUtils::Constrain(camTopLeft.x, -_gridOffset.x, _gridOffset.x),
@@ -474,14 +474,14 @@ void BoidManager::ComputeFlocks()
 		if ( _inFlock.find(boid) == _inFlock.end() )
 		{
 			_inFlock.emplace(boid);
-			Set<Boid *> currentFlock;
+			TreeSet<Boid *> currentFlock;
 			IterativeFlockCheck(boid, currentFlock);
 			_flocks.push_back(currentFlock);
 		}
 	}
 }
 
-void BoidManager::IterativeFlockCheck(const Boid &boid, Set<Boid *> &currentFlock)
+void BoidManager::IterativeFlockCheck(const Boid &boid, TreeSet<Boid *> &currentFlock)
 {
 	for ( const auto &neighbor : boid.GetNeighbors() )
 	{
@@ -575,13 +575,13 @@ void BoidManager::ComputeFlockLinesVA()
 			continue;
 		}
 
-		ArrayList<sf::Vector2f> flockPoints;
+		List<sf::Vector2f> flockPoints;
 		for ( const auto &boid : flock )
 		{
 			flockPoints.push_back(boid->GetPosition());
 		}
 
-		ArrayList<sf::Vector2f> wrapped(GenUtils::WrapPoints(flockPoints));
+		List<sf::Vector2f> wrapped(GenUtils::WrapPoints(flockPoints));
 		for ( auto &point : wrapped )
 		{
 			_flockLinesVA.append({ point, _flockLinesColor });
@@ -618,7 +618,7 @@ void BoidManager::ComputeActiveQuadTreeGridVA()
 	}
 }
 
-void BoidManager::ComputeNeighborsLinesVAHelper(sf::VertexArray &va, const ArrayList<Boid> &boids, bool onlyVisible)
+void BoidManager::ComputeNeighborsLinesVAHelper(sf::VertexArray &va, const List<Boid> &boids, bool onlyVisible)
 {
 	va.clear();
 	auto totalNeighbors = 0;
@@ -650,7 +650,7 @@ void BoidManager::ComputeNeighborsLinesVAHelper(sf::VertexArray &va, const Array
 	}
 }
 
-void BoidManager::ComputePhysicsLinesVAHelper(sf::VertexArray &va, const ArrayList<Boid> &boids, bool velocity)
+void BoidManager::ComputePhysicsLinesVAHelper(sf::VertexArray &va, const List<Boid> &boids, bool velocity)
 {
 	va.clear();
 	const auto noVerticies = boids.size() * 2;
