@@ -19,7 +19,7 @@ Visualizing flocking simluation
 </p>
 
 ## Try it out - No building needed
-Run the executable under `examples/<platform>/`
+Run the executable under `Example/<Platform>/`
   
 ## Build yourself
 
