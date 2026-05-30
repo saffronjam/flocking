@@ -1,15 +1,18 @@
-﻿#pragma once
+#pragma once
 
-#include "Layers/BaseLayer.h"
+#include <memory>
 
-#include "BoidManager.h"
+#include "layers/base_layer.h"
 
-namespace Se
+#include "boid_manager.h"
+
+namespace flocking
 {
+using namespace saffron;
 class ProjectLayer : public BaseLayer
 {
 public:
-	void OnAttach(Shared<Batch> &loader) override;
+	void OnAttach(std::shared_ptr<Batch> &loader) override;
 	void OnDetach() override;
 
 	void OnUpdate() override;
@@ -18,7 +21,7 @@ public:
 	void OnRenderTargetResize(const sf::Vector2f &newSize) override;
 
 private:
-	Unique<BoidManager> _boidManager;
+	std::unique_ptr<BoidManager> _boidManager;
 	bool _firstRenderTargetResize = true;
 };
 }

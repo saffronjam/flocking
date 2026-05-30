@@ -1,15 +1,20 @@
-﻿#pragma once
+#pragma once
 
-#include <Saffron.h>
+#include <memory>
 
-namespace Se
+#include <vector>
+
+#include <saffron.h>
+
+namespace flocking
 {
-class BaseLayer : public Layer
+using namespace saffron;
+class BaseLayer : public LayerImpl
 {
 public:
 	BaseLayer();
 
-	void OnAttach(Shared<Batch> &loader) override;
+	void OnAttach(std::shared_ptr<Batch> &loader) override;
 	void OnDetach() override;
 
 	void OnPreFrame() override;
@@ -25,7 +30,7 @@ private:
 	void OnWantRenderTargetResize(const sf::Vector2f &newSize);
 
 public:
-	EventSubscriberList<const sf::Vector2f &> RenderTargetResized;
+	SubscriberList<const sf::Vector2f &> RenderTargetResized;
 
 protected:
 	ControllableRenderTexture _controllableRenderTexture;

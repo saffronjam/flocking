@@ -1,11 +1,14 @@
 #pragma once
 
-#include <Saffron.h>
+#include <memory>
 
-#include "Layers/ProjectLayer.h"
+#include <saffron.h>
 
-namespace Se
+#include "layers/project_layer.h"
+
+namespace flocking
 {
+using namespace saffron;
 class ProjectApplication : public App
 {
 public:

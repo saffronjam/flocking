@@ -1,7 +1,9 @@
-#include "Boid.h"
+#include <utility>
+#include "boid.h"
 
-namespace Se
+namespace flocking
 {
+using namespace saffron;
 Boid::Boid(const sf::Vector2f &position) :
 	_position(position),
 	_velocity(0.0f, 0.0f),
@@ -57,7 +59,7 @@ void Boid::Update()
 
 void Boid::RenderVision(Scene &scene) const
 {
-	scene.Submit(_visionShape);
+	scene.Submit(_visionShape, sf::RenderStates::Default);
 }
 
 sf::Vector2f Boid::GetSeparationForce() const
@@ -128,11 +130,11 @@ sf::Vector2f Boid::GetForward() const
 	return _forward;
 }
 
-Pair<sf::Vector2f, sf::Vector2f> Boid::GetSightBounds() const
+std::pair<sf::Vector2f, sf::Vector2f> Boid::GetSightBounds() const
 {
 	const sf::Vector2f position = GetPosition();
 	const sf::Vector2f forward = GetForward();
-	return CreatePair(VecUtils::Rotate(forward, GenUtils::Radians(-_sightAngle / 2.0f), VecUtils::Null<>()) * _sightRadius + position,
+	return std::make_pair(VecUtils::Rotate(forward, GenUtils::Radians(-_sightAngle / 2.0f), VecUtils::Null<>()) * _sightRadius + position,
 					  VecUtils::Rotate(forward, GenUtils::Radians(_sightAngle / 2.0f), VecUtils::Null<>()) * _sightRadius + position);
 }
 

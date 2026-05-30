@@ -1,9 +1,13 @@
-#include "BoidManager.h"
+#include <utility>
+#include <vector>
+#include <set>
+#include "boid_manager.h"
 
 #include <SFML/Graphics.hpp>
 
-namespace Se
+namespace flocking
 {
+using namespace saffron;
 BoidManager::BoidManager(Camera &camera) :
 	_camera(camera),
 	_quadtreeRect(-_gridOffset, _gridOffset * 2.0f),
@@ -143,7 +147,7 @@ void BoidManager::OnGuiRender()
 			Pause();
 		}
 	}
-	Gui::BeginPropertyGrid("NoBoids");
+	Gui::BeginPropertyGrid("NoBoids", -1.0f);
 	if ( Gui::Property("Boid Count", _noBoids, 1, 200, 1, GuiPropertyFlag_Slider) )
 	{
 		SetBoidCount(_noBoids);
@@ -152,7 +156,7 @@ void BoidManager::OnGuiRender()
 
 	ImGui::Separator();
 
-	Gui::BeginPropertyGrid("Forces");
+	Gui::BeginPropertyGrid("Forces", -1.0f);
 	if ( Gui::Property("Separation", _separationMultiplier, 0.0f, 10.0f, 0.1f, GuiPropertyFlag_Slider) )
 	{
 		SetSeparationMultiplier(_separationMultiplier);
@@ -169,7 +173,7 @@ void BoidManager::OnGuiRender()
 
 	ImGui::Separator();
 
-	Gui::BeginPropertyGrid("Speed");
+	Gui::BeginPropertyGrid("Speed", -1.0f);
 	if ( Gui::Property("Min Speed", _minSpeed, 0.0f, 1000.0f, 1.0f, GuiPropertyFlag_Slider) )
 	{
 		SetMinSpeed(_minSpeed);
@@ -190,7 +194,7 @@ void BoidManager::OnGuiRender()
 
 	ImGui::Separator();
 
-	Gui::BeginPropertyGrid("Vision");
+	Gui::BeginPropertyGrid("Vision", -1.0f);
 	if ( Gui::Property("Vision Radius", _visionRadius, 0.0f, 400.0, 1.0f, GuiPropertyFlag_Slider) )
 	{
 		SetVisionRadius(_visionRadius);
@@ -203,7 +207,7 @@ void BoidManager::OnGuiRender()
 
 	ImGui::Separator();
 
-	Gui::BeginPropertyGrid("DrawCheckboxes");
+	Gui::BeginPropertyGrid("DrawCheckboxes", -1.0f);
 	Gui::Property("Bodies", _renderBodies);
 	Gui::Property("Vision", _renderVision);
 	Gui::Property("Neighbors", _renderNeighbors);
@@ -263,7 +267,7 @@ void BoidManager::RenderBodies(Scene &scene) const
 {
 	for ( const auto &boid : _boids )
 	{
-		scene.Submit(boid.GetBodyShape());
+		scene.Submit(boid.GetBodyShape(), sf::RenderStates::Default);
 	}
 }
 
@@ -277,33 +281,33 @@ void BoidManager::RenderSightShapes(Scene &scene) const
 
 void BoidManager::RenderNeighbors(Scene &scene) const
 {
-	scene.Submit(_neighborLinesVA);
+	scene.Submit(_neighborLinesVA, sf::RenderStates::Default);
 }
 
 void BoidManager::RenderVisibleNeighbors(Scene &scene) const
 {
-	scene.Submit(_visibleNeighborLinesVA);
+	scene.Submit(_visibleNeighborLinesVA, sf::RenderStates::Default);
 }
 
 void BoidManager::RenderVelocities(Scene &scene) const
 {
-	scene.Submit(_velocityLinesVA);
+	scene.Submit(_velocityLinesVA, sf::RenderStates::Default);
 }
 
 void BoidManager::RenderAccelerations(Scene &scene) const
 {
-	scene.Submit(_accelerationLinesVA);
+	scene.Submit(_accelerationLinesVA, sf::RenderStates::Default);
 }
 
 void BoidManager::RenderQuadTree(Scene &scene)
 {
-	scene.Submit(_quadtreeGridVA);
-	scene.Submit(_activeQuadtreeGridVA);
+	scene.Submit(_quadtreeGridVA, sf::RenderStates::Default);
+	scene.Submit(_activeQuadtreeGridVA, sf::RenderStates::Default);
 }
 
 void BoidManager::RenderFlockConvexHull(Scene &scene)
 {
-	scene.Submit(_flockLinesVA);
+	scene.Submit(_flockLinesVA, sf::RenderStates::Default);
 }
 
 void BoidManager::Pause()
@@ -471,23 +475,23 @@ void BoidManager::ComputeFlocks()
 	_inFlock.clear();
 	for ( auto &boid : _boids )
 	{
-		if ( _inFlock.find(boid) == _inFlock.end() )
+		if ( _inFlock.find(&boid) == _inFlock.end() )
 		{
-			_inFlock.emplace(boid);
-			TreeSet<Boid *> currentFlock;
+			_inFlock.emplace(&boid);
+			std::set<Boid *> currentFlock;
 			IterativeFlockCheck(boid, currentFlock);
 			_flocks.push_back(currentFlock);
 		}
 	}
 }
 
-void BoidManager::IterativeFlockCheck(const Boid &boid, TreeSet<Boid *> &currentFlock)
+void BoidManager::IterativeFlockCheck(const Boid &boid, std::set<Boid *> &currentFlock)
 {
 	for ( const auto &neighbor : boid.GetNeighbors() )
 	{
 		if ( currentFlock.emplace(const_cast<Boid *>(neighbor)).second )
 		{
-			_inFlock.emplace(*neighbor);
+			_inFlock.emplace(neighbor);
 			IterativeFlockCheck(*neighbor, currentFlock);
 		}
 	}
@@ -498,11 +502,11 @@ sf::Vector2f BoidManager::GetRepulsionBorderForce(const Boid &boid) const
 	const sf::Vector2f position = boid.GetPosition();
 	const auto &box = _repulsionBorders;
 
-	const auto xRange = CreatePair(box.left, box.left + box.width);
-	const auto yRange = CreatePair(box.top, box.top + box.height);
+	const auto xRange = std::make_pair(box.left, box.left + box.width);
+	const auto yRange = std::make_pair(box.top, box.top + box.height);
 
-	float fromLeft = GenUtils::Map(position.x, xRange, CreatePair(-1.0f, 1.0f));
-	float fromTop = GenUtils::Map(position.y, yRange, CreatePair(-1.0f, 1.0f));
+	float fromLeft = GenUtils::Map(position.x, xRange, std::make_pair(-1.0f, 1.0f));
+	float fromTop = GenUtils::Map(position.y, yRange, std::make_pair(-1.0f, 1.0f));
 	float fromRight = -fromLeft;
 	float fromBottom = -fromTop;
 
@@ -575,13 +579,13 @@ void BoidManager::ComputeFlockLinesVA()
 			continue;
 		}
 
-		List<sf::Vector2f> flockPoints;
+		std::vector<sf::Vector2f> flockPoints;
 		for ( const auto &boid : flock )
 		{
 			flockPoints.push_back(boid->GetPosition());
 		}
 
-		List<sf::Vector2f> wrapped(GenUtils::WrapPoints(flockPoints));
+		std::vector<sf::Vector2f> wrapped(GenUtils::WrapPoints(flockPoints));
 		for ( auto &point : wrapped )
 		{
 			_flockLinesVA.append({ point, _flockLinesColor });
@@ -618,7 +622,7 @@ void BoidManager::ComputeActiveQuadTreeGridVA()
 	}
 }
 
-void BoidManager::ComputeNeighborsLinesVAHelper(sf::VertexArray &va, const List<Boid> &boids, bool onlyVisible)
+void BoidManager::ComputeNeighborsLinesVAHelper(sf::VertexArray &va, const std::vector<Boid> &boids, bool onlyVisible)
 {
 	va.clear();
 	auto totalNeighbors = 0;
@@ -650,7 +654,7 @@ void BoidManager::ComputeNeighborsLinesVAHelper(sf::VertexArray &va, const List<
 	}
 }
 
-void BoidManager::ComputePhysicsLinesVAHelper(sf::VertexArray &va, const List<Boid> &boids, bool velocity)
+void BoidManager::ComputePhysicsLinesVAHelper(sf::VertexArray &va, const std::vector<Boid> &boids, bool velocity)
 {
 	va.clear();
 	const auto noVerticies = boids.size() * 2;

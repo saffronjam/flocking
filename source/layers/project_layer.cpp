@@ -1,14 +1,16 @@
-﻿#include "ProjectLayer.h"
+#include <memory>
+#include "project_layer.h"
 
-namespace Se
+namespace flocking
 {
-void ProjectLayer::OnAttach(Shared<Batch> &loader)
+using namespace saffron;
+void ProjectLayer::OnAttach(std::shared_ptr<Batch> &loader)
 {
 	BaseLayer::OnAttach(loader);
 
 	loader->Submit([this]
 				   {
-					   _boidManager = CreateUnique<BoidManager>(_camera);
+					   _boidManager = std::make_unique<BoidManager>(_camera);
 				   }, "Creating Boid Manager");
 
 	_controllableRenderTexture.SetClearColor({ 10, 10, 10 });

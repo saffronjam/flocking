@@ -1,11 +1,18 @@
 #pragma once
 
-#include <Saffron.h>
+#include <utility>
 
-#include "Boid.h"
+#include <vector>
 
-namespace Se
+#include <set>
+
+#include <saffron.h>
+
+#include "boid.h"
+
+namespace flocking
 {
+using namespace saffron;
 class BoidManager
 {
 public:
@@ -53,7 +60,7 @@ private:
 
 	void ComputeAllVisibleNeighbors();
 	void ComputeFlocks();
-	void IterativeFlockCheck(const Boid &boid, TreeSet<Boid *> &currentFlock);
+	void IterativeFlockCheck(const Boid &boid, std::set<Boid *> &currentFlock);
 	sf::Vector2f GetRepulsionBorderForce(const Boid &boid) const;
 
 	void ComputeQuadTree();
@@ -66,18 +73,18 @@ private:
 	void ComputeFlockLinesVA();
 	void ComputeActiveQuadTreeGridVA();
 
-	static void ComputeNeighborsLinesVAHelper(sf::VertexArray &va, const List<Boid> &boids, bool onlyVisible);
-	static void ComputePhysicsLinesVAHelper(sf::VertexArray &va, const List<Boid> &boids, bool velocity);
+	static void ComputeNeighborsLinesVAHelper(sf::VertexArray &va, const std::vector<Boid> &boids, bool onlyVisible);
+	static void ComputePhysicsLinesVAHelper(sf::VertexArray &va, const std::vector<Boid> &boids, bool velocity);
 
 private:
 	Camera &_camera;
 
 	sf::Vector2f _gridOffset = { 1000.0f, 600.0f };
 
-	List<Boid> _boids;
-	List<TreeSet<Boid *>> _flocks;
-	TreeSet<Boid> _inFlock;
-	List<List<List<Boid *>>> _quadtree;
+	std::vector<Boid> _boids;
+	std::vector<std::set<Boid *>> _flocks;
+		std::set<const Boid *> _inFlock;
+	std::vector<std::vector<std::vector<Boid *>>> _quadtree;
 
 	sf::VertexArray _neighborLinesVA{ sf::PrimitiveType::Lines };
 	bool _wantComputeNeighborLines = true;
@@ -96,7 +103,7 @@ private:
 
 	sf::FloatRect _quadtreeRect;
 	sf::FloatRect _quadtreeBox;
-	TreeSet<Pair<int, int>> _activeQuadtreeContainers;
+	std::set<std::pair<int, int>> _activeQuadtreeContainers;
 	sf::VertexArray _quadtreeGridVA{ sf::PrimitiveType::Lines };
 	sf::VertexArray _activeQuadtreeGridVA{ sf::PrimitiveType::Quads };
 	bool _wantComputeActiveQuadtreeGrid = true;

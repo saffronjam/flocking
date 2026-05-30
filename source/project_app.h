@@ -1,11 +1,14 @@
 #pragma once
 
-#include <Saffron.h>
+#include <memory>
 
-#include "Layers/ProjectLayer.h"
+#include <saffron.h>
 
-namespace Se
+#include "layers/project_layer.h"
+
+namespace flocking
 {
+using namespace saffron;
 class ProjectApp : public App
 {
 public:
@@ -16,6 +19,6 @@ public:
 	void OnUpdate() override;
 
 private:
-	Shared<ProjectLayer> _projectLayer;
+	std::shared_ptr<ProjectLayer> _projectLayer;
 };
 }

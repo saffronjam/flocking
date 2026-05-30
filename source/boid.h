@@ -1,18 +1,20 @@
 #pragma once
 
-#include <Saffron.h>
+#include <utility>
 
-namespace Se
+#include <set>
+
+#include <saffron.h>
+
+namespace flocking
 {
+using namespace saffron;
 class Boid
 {
 public:
 	explicit Boid(const sf::Vector2f &position);
 
-	bool operator==(const Boid &otherBoid) const { return _uuid == otherBoid._uuid; }
-	bool operator<(const Boid &otherBoid) const { return _uuid < otherBoid._uuid; }
-
-	void Update();
+		void Update();
 	void RenderVision(Scene &scene) const;
 
 	sf::Vector2f GetSeparationForce() const;
@@ -23,18 +25,19 @@ public:
 	void AddVisibleNeighbor(const Boid *boid) { _visibleNeighbors.emplace(boid); }
 	void ClearNeighbors() { _neighbors.clear(); }
 	void ClearVisibleNeighbors() { _visibleNeighbors.clear(); }
-	const TreeSet<const Boid *> &GetNeighbors() const { return _neighbors; }
-	const TreeSet<const Boid *> &GetVisibleNeighbors() const { return _visibleNeighbors; }
+	const std::set<const Boid *> &GetNeighbors() const { return _neighbors; }
+	const std::set<const Boid *> &GetVisibleNeighbors() const { return _visibleNeighbors; }
 
 	void ApplyForce(const sf::Vector2f &force);
 	void ResetForce() { _acceleration = VecUtils::Null<>(); }
 
-	const sf::Vector2f &GetPosition() const { return _position; }
-	void SetPosition(const sf::Vector2f &position) { _position = position; }
+		const sf::Vector2f &GetPosition() const { return _position; }
+		void SetPosition(const sf::Vector2f &position) { _position = position; }
+		const UUID& Id() const { return _uuid; }
 
 	float GetSightRadius() const { return _sightRadius; }
 	float GetSightAngle() const { return _sightAngle; }
-	Pair<sf::Vector2f, sf::Vector2f> GetSightBounds() const;
+	std::pair<sf::Vector2f, sf::Vector2f> GetSightBounds() const;
 
 	sf::Vector2f GetForward() const;
 	sf::Vector2f GetVelocity() const { return _velocity; };
@@ -82,11 +85,11 @@ private:
 	float _alignmentMultiplier;
 	float _cohesionMultiplier;
 
-	TreeSet<const Boid *> _neighbors;
-	TreeSet<const Boid *> _visibleNeighbors;
+	std::set<const Boid *> _neighbors;
+	std::set<const Boid *> _visibleNeighbors;
 
 	sf::Color _bodyColor{ sf::Color::Red };
-	sf::Color _visionShapeColor{ Random::Color() };
+	sf::Color _visionShapeColor{ Random::Color(false) };
 	sf::Color _neighborLinesColor{ 0, 0, 150, 70 };
 	sf::Color _visibleNeighborLinesColor{ 120, 0, 255, 200 };
 	sf::Color _velocityLineColor{ 0, 255, 0, 150 };
