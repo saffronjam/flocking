@@ -6,7 +6,7 @@ namespace saffron
 {
 auto CreateApplication() -> std::unique_ptr<App>
 {
-	return std::make_unique<flocking::ProjectApp>(AppProperties::CreateFullscreen("flocking"));
+	return std::make_unique<flocking::ProjectApp>(AppProperties::CreateMaximized("flocking"));
 }
 }
 
